@@ -23,6 +23,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
+import kotlin.io.path.absolutePathString
 
 private object Server
 
@@ -36,8 +37,10 @@ fun main(): Unit = runBlocking {
             log.warn { "Shutting down." }
         }
     })
-    val staticDir = Paths.get("browser/build/distributions").also {
-        check(Files.isDirectory(it))
+    // NB this directory will not be found if you run the server from IDEA because the working directory will be
+    // the root of the top level project.
+    val staticDir = Paths.get("../browser/build/distributions").also {
+        check(Files.isDirectory(it)) { "Static directory not found: ${it.absolutePathString()}"}
     }
     val config = HikariConfig().apply {
         jdbcUrl = "jdbc:h2:mem:kjs"

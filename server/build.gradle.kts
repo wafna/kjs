@@ -36,12 +36,12 @@ tasks.withType<KotlinCompile> {
 }
 
 application {
-    mainClass.set("wafna.kwap.server.ServerKt")
+    mainClass.set("wafna.kjs.server.ServerKt")
 }
 
 distributions {
     main {
-        distributionBaseName.set("kwap")
+        distributionBaseName.set("kjs")
         contents {
             from(file("configs")) {
                 into("configs")
