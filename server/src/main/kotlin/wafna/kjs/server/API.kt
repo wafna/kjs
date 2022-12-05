@@ -31,33 +31,12 @@ suspend fun ApplicationCall.bracket(block: suspend ApplicationCall.() -> Unit) {
     }
 }
 
-private val gson = GsonBuilder()
-    .registerTypeAdapter(
-        UUID::class.java,
-        object : JsonDeserializer<UUID> {
-            override fun deserialize(
-                json: JsonElement?,
-                typeOfT: Type?,
-                context: JsonDeserializationContext?
-            ): UUID {
-                try {
-                    return json!!.asString.let {
-                        UUID.fromString(it)
-                    }
-                } catch (e: Throwable) {
-                    log.error(e) { "Bummer, dude." }
-                    throw e
-                }
-            }
-        })
-    .create()
-
 /**
  * The browser API.
  */
-internal fun Routing.api(db: DB) {
-    route("/api") {
-        get("/list") {
+internal fun Route.api(db: DB) {
+    route("/record") {
+        get("") {
             call.bracket {
                 db.readRecords().let { records ->
                     log.info { "LIST ${records.size}" }
@@ -65,43 +44,30 @@ internal fun Routing.api(db: DB) {
                 }
             }
         }
-        delete("/delete") {
+        delete("") {
             call.bracket {
-                val rawId = parameters["id"]
-                log.error { "########### RAW ID $rawId"}
-                val id = UUID.fromString(rawId)
+                val id = UUID.fromString(parameters["id"])
                 log.info { "DELETE $id" }
                 if (db.deleteRecord(id))
-                    call.ok()
+                    ok()
                 else
-                    call.badRequest()
+                    badRequest()
             }
         }
-        post("/create") {
-            log.info { "CREATE" }
+        put("") {
             call.bracket {
-//                val record = call.receive<Record>()
-//                    .copy(id = UUID.randomUUID())
-                val text = call.receiveText()
-                log.info { "CREATE ${text::class} $text" }
-                val record = gson.fromJson(text, Record::class.java)
+                val record = receive<Record>()
                     .copy(id = UUID.randomUUID())
                 log.info { "CREATE $record" }
                 db.createRecord(record)
                 respond(record)
             }
         }
-        post("/update") {
-            log.info { "UPDATE" }
+        post("") {
             call.bracket {
-//                val record = call.receive<Record>()
-//                log.info { "UPDATE ${record.id}  \"${record.data}\"" }
-                val text = call.receiveText()
-                log.info { "UPDATE ${text::class} $text" }
-                val record = gson.fromJson(text, Record::class.java)
+                val record = receive<Record>()
                 log.info { "UPDATE $record" }
                 db.updateRecord(record)
-                log.info { "UPDATE COMPLETE" }
             }
         }
     }

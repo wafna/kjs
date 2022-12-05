@@ -29,7 +29,7 @@ data class Record(val id: UUID, val data: String)
  * Should be an integration test, but is just an ad hoc exercise of the API.
  */
 fun main() = runBlocking(Dispatchers.IO) {
-    val baseURL = "http://localhost:8081/api"
+
     HttpClient(CIO) {
         install(ContentNegotiation) {
             gson {
@@ -39,8 +39,12 @@ fun main() = runBlocking(Dispatchers.IO) {
         }
     }.use { client ->
 
+        val baseURL = "http://localhost:8081/api"
+
+        // Define the API.
+
         suspend fun list(): List<Record> = client
-            .get("$baseURL/list") {
+            .get("$baseURL/record") {
                 headers {
                     acceptJson()
                 }
@@ -55,7 +59,7 @@ fun main() = runBlocking(Dispatchers.IO) {
             }
 
         suspend fun update(record: Record) = client
-            .post("$baseURL/update") {
+            .post("$baseURL/record") {
                 headers {
                     sendJson()
                 }
@@ -64,19 +68,21 @@ fun main() = runBlocking(Dispatchers.IO) {
         //.checkStatus()
 
         suspend fun create(record: Record) = client
-            .post("$baseURL/create") {
+            .put("$baseURL/record") {
                 headers {
                     sendJson()
                     acceptJson()
                 }
                 setBody(record)
             }
-//            .checkStatus()
+            //.checkStatus()
             .body<Record>()
 
         suspend fun delete(id: String) = client
-            .delete("$baseURL/delete?id=$id")
+            .delete("$baseURL/record?id=$id")
             .checkStatus()
+
+        // Do stuff...
 
         list().also { records ->
             require(3 == records.size)
