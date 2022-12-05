@@ -34,7 +34,6 @@ fun main() = runBlocking(Dispatchers.IO) {
         install(ContentNegotiation) {
             gson {
                 serializeNulls()
-                setPrettyPrinting()
             }
         }
     }.use { client ->
