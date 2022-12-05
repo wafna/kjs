@@ -1,6 +1,7 @@
 package wafna.kjs.server
 
 import com.zaxxer.hikari.HikariDataSource
+import wafna.kjs.Record
 import java.util.*
 
 class DB(private val dataSource: HikariDataSource) {

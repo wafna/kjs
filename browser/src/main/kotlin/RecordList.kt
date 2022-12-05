@@ -40,11 +40,13 @@ val RecordEditor = FC<RecordEditorProps> { props ->
                 if (null == record) {
                     +"Create"
                     onClick = {
+                        it.preventDefault()
                         props.createRecord(data)
                     }
                 } else {
                     +"Update"
                     onClick = {
+                        it.preventDefault()
                         props.updateRecord(Record(record.id, data))
                     }
                 }
@@ -133,7 +135,7 @@ val RecordList = FC<Props> {
                     record = editedRecord
                     updateRecord = { record ->
                         mainScope.launch {
-                            console.log("update record", record, Json.encodeToJsonElement(record))
+                            console.log("update record", record)
                             API.updateRecord(record)
                             editedRecord = null
                         }

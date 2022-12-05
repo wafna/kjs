@@ -17,6 +17,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import org.flywaydb.core.Flyway
+import wafna.kjs.Record
 import wafna.kjs.util.LazyLogger
 import java.lang.reflect.Type
 import java.nio.file.Files
@@ -28,8 +29,6 @@ import kotlin.io.path.absolutePathString
 private object Server
 
 private val log = LazyLogger(Server::class)
-
-data class Record(val id: UUID, val data: String)
 
 fun main(): Unit = runBlocking {
     Runtime.getRuntime().addShutdownHook(object : Thread() {
@@ -84,7 +83,6 @@ fun runServer(staticDir: Path, db: DB) {
                 anyHost()
                 allowHeaders { true }
                 allowNonSimpleContentTypes = true
-                // Only need GET!
                 methods.addAll(listOf(HttpMethod.Get, HttpMethod.Delete, HttpMethod.Post, HttpMethod.Put))
             }
             // See https://ktor.io/docs/gson.html
