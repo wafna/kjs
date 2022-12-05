@@ -1,7 +1,7 @@
 FORCE: ;
 
 test: FORCE
-	@./gradlew :test
+	@./gradlew test
 
 server: FORCE
 	@./gradlew :server:run
@@ -10,4 +10,4 @@ browser: FORCE
 	@./gradlew :browser:browserDevelopmentRun
 
 build: FORCE
-	@./gradlew :clean :build --warning-mode all
+	@./gradlew clean build --warning-mode all
