@@ -11,12 +11,7 @@ external interface NavItemProps : Props {
 
 val NavItem = FC<NavItemProps> { props ->
     ReactHTML.li {
-        css(ClassName(buildList {
-            add("nav-item")
-            if (props.active)
-                add("active")
-        }.joinToString(" ")))
-
+        css(classNames("nav-item", if (props.active) "active" else null))
         ReactHTML.a {
             css(ClassName("nav-link"))
             +props.name
@@ -25,18 +20,14 @@ val NavItem = FC<NavItemProps> { props ->
     }
 }
 
-external interface ChromeProps : Props {
-    var page: FC<Props>
-}
-
-val Chrome = FC<ChromeProps> { props ->
+val Chrome = FC<Props> {
     ReactHTML.nav {
         css(ClassName("navbar navbar-expand-lg navbar-light bg-light"))
         ReactHTML.ul {
             css(ClassName("navbar-nav mr-auto"))
             NavItem {
-                name = "Records"
-                href = ""
+                name = "REST"
+                href = "rest"
                 active = false
             }
             NavItem {
@@ -44,23 +35,6 @@ val Chrome = FC<ChromeProps> { props ->
                 href = "other"
                 active = true
             }
-//            ReactHTML.li {
-//                css(ClassName("nav-item"))
-//                ReactHTML.a {
-//                    css(ClassName("nav-link"))
-//                    +"Records"
-//                    href = "#"
-//                }
-//            }
-//            ReactHTML.li {
-//                css(ClassName("nav-item"))
-//                ReactHTML.a {
-//                    css(ClassName("nav-link"))
-//                    +"Other"
-//                    href = "#other"
-//                }
-//            }
         }
     }
-    props.page()
 }

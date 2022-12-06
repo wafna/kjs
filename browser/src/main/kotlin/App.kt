@@ -3,13 +3,14 @@ import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import react.FC
 import react.Props
+import react.dom.html.ReactHTML
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
 import react.useEffectOnce
 import react.useState
 
 val Other = FC<Props> {
-    h1 { +"Other" }
+    ReactHTML.h3 { +"Nav and permalink to here." }
 }
 
 /**
@@ -44,11 +45,11 @@ val App = FC<Props> {
             +"Kotlin Client Server (React)"
         }
         div {
-            Chrome {
-                page = when (hash) {
-                    "other" -> Other
-                    else -> RecordList
-                }
+            Chrome {}
+            when (hash) {
+                "other" -> Other {}
+                "rest" -> RecordList {}
+                else -> RecordList {}
             }
         }
     }

@@ -1,12 +1,17 @@
 import csstype.ClassName
 import csstype.Cursor
 import emotion.react.css
-import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import org.w3c.dom.HTMLSpanElement
 import react.*
-import react.dom.events.MouseEvent
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML.button
+import react.dom.html.ReactHTML.small
+import react.dom.html.ReactHTML.strong
+import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.em
+import react.dom.html.ReactHTML.form
+import react.dom.html.ReactHTML.input
+import react.dom.html.ReactHTML.label
+import react.dom.html.ReactHTML.span
 
 external interface RecordEditorProps : Props {
     var record: Record?
@@ -19,15 +24,15 @@ val RecordEditor = FC<RecordEditorProps> { props ->
 
     var data by useState(record?.data ?: "")
 
-    ReactHTML.form {
-        ReactHTML.div {
+    form {
+        div {
             val ctrlId = "the-data"
             css(ClassName("form-group"))
-            ReactHTML.label {
+            label {
                 +"Data"
                 htmlFor = ctrlId
             }
-            ReactHTML.input {
+            input {
                 id = ctrlId
                 css(ClassName("form-control"))
                 placeholder = "..."
@@ -37,19 +42,20 @@ val RecordEditor = FC<RecordEditorProps> { props ->
                 }
             }
         }
-        ReactHTML.div {
-            ReactHTML.button {
-                css(ClassName("btn btn-primary"))
-                if (null == record) {
+        div {
+            if (null == record) {
+                button {
+                    css(ClassName("btn btn-primary"))
                     +"Create"
-                    onClick = {
-                        it.preventDefault()
+                    onClick = preventDefault {
                         props.createRecord(RecordWIP(data))
                     }
-                } else {
+                }
+            } else {
+                button {
+                    css(classNames("btn", "btn-primary"))
                     +"Update"
-                    onClick = {
-                        it.preventDefault()
+                    onClick = preventDefault {
                         props.updateRecord(Record(record.id, data))
                     }
                 }
@@ -59,10 +65,9 @@ val RecordEditor = FC<RecordEditorProps> { props ->
 }
 
 val RecordList = FC<Props> {
+
     var records: List<Record>? by useState(null)
-
     var editedRecord: Record? by useState(null)
-
     var createNew by useState(false)
 
     suspend fun updateList() {
@@ -77,35 +82,37 @@ val RecordList = FC<Props> {
 
     when (records) {
         null -> Loading
-        else -> ReactHTML.div {
-            ReactHTML.div {
+        else -> div {
+            div {
                 css(ClassName("container"))
                 fun col(n: Int) = "col-lg-$n"
-                ReactHTML.div {
+                div {
                     css(ClassName("row"))
-                    ReactHTML.div {
+                    div {
                         css(ClassName(col(1)))
+                        small { +"delete" }
                     }
-                    ReactHTML.div {
+                    div {
                         css(ClassName(col(1)))
+                        small { +"modify" }
                     }
-                    ReactHTML.div {
+                    div {
                         css(ClassName(col(5)))
-                        ReactHTML.span { +"Id" }
+                        strong { +"Id" }
                     }
-                    ReactHTML.div {
+                    div {
                         css(ClassName(col(5)))
-                        ReactHTML.span { +"Data" }
+                        strong { +"Data" }
                     }
                 }
                 records!!.forEach { record ->
                     val id = record.id
-                    ReactHTML.div {
+                    div {
                         css(ClassName("row"))
-                        ReactHTML.div {
+                        div {
                             css(ClassName(col(1)))
                             key = id
-                            ReactHTML.span {
+                            span {
                                 css {
                                     cursor = Cursor.pointer
                                 }
@@ -118,9 +125,9 @@ val RecordList = FC<Props> {
                                 }
                             }
                         }
-                        ReactHTML.div {
+                        div {
                             css(ClassName(col(1)))
-                            ReactHTML.span {
+                            span {
                                 css {
                                     cursor = Cursor.pointer
                                 }
@@ -130,20 +137,20 @@ val RecordList = FC<Props> {
                                 }
                             }
                         }
-                        ReactHTML.div {
+                        div {
                             css(ClassName(col(5)))
-                            ReactHTML.span { +record.id }
+                            span { +record.id }
                         }
-                        ReactHTML.div {
+                        div {
                             css(ClassName(col(5)))
-                            ReactHTML.span { +record.data }
+                            span { +record.data }
                         }
                     }
                 }
             }
-            ReactHTML.button {
+            button {
                 css(ClassName("btn btn-primary"))
-                ReactHTML.em { +"+" }
+                em { +"+" }
                 onClick = { e ->
                     e.preventDefault()
                     createNew = true

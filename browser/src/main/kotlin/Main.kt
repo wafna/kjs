@@ -19,11 +19,13 @@ fun preventDefault(op: () -> Unit): (react.dom.events.MouseEvent<*, *>) -> Unit 
     op()
 }
 
+// By allowing nulls we can conditionally inline CSS classes.
+fun classNames(vararg className: String?): ClassName =
+    ClassName(className.filterNotNull().joinToString(" "))
+
 val Loading = FC<Props> {
     ReactHTML.h1 { +"Loading..." }
 }
-
-typealias UUID = String
 
 fun main() {
     document.getElementById("root")?.also {
