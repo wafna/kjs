@@ -8,6 +8,29 @@
 Some run configurations for IDEA are included in `.run`.
 One starts the server, another runs the browser client in continuous update mode.
 
+## Projects
+
+* **server**
+
+Hosts an HTTP endpoint on port 8081 that serves the production build of the web app
+and serves the API.
+
+* **browser**
+
+A single page web app that consumes the API.
+
+* **domain**
+
+Data definitions shared among projects.
+
+* **client**
+
+A KTor client for the server API.
+
+* **util**
+
+Non-project specific shared code and dependencies.
+
 ### References
 
 Overview, benefits, motivation.
