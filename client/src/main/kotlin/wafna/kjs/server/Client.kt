@@ -64,7 +64,7 @@ fun main() = runBlocking(Dispatchers.IO) {
                 }
                 setBody(record)
             }
-        //.checkStatus()
+            .checkStatus()
 
         suspend fun create(record: Record) = client
             .put("$baseURL/record") {

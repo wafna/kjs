@@ -28,6 +28,7 @@ suspend fun ApplicationCall.bracket(block: suspend ApplicationCall.() -> Unit) {
     } catch (e: Throwable) {
         log.error(e) { "Call bracket." }
         internalServerError()
+        throw e
     }
 }
 
