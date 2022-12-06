@@ -32,7 +32,7 @@ suspend fun ApplicationCall.bracket(
     } catch (e: CancellationException) {
         throw e
     } catch (e: Throwable) {
-        log.error(e) { "Call bracket." }
+        log.error(e) { "HTTP Error: ${request.httpMethod.value} ${request.uri}" }
         internalServerError()
     }
 }
