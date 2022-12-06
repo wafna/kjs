@@ -120,6 +120,7 @@ fun runServer(staticDir: Path, db: DB) {
                                 context: JsonDeserializationContext?
                             ): UUID {
                                 try {
+                                    wafna.kjs.server.log.warn { ">>>>>>>>>>>>>>>>> UUID" }
                                     return json!!.asString
                                         .let { UUID.fromString(it) }
                                 } catch (e: Throwable) {

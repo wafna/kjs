@@ -1,5 +1,6 @@
 package wafna.kjs.server
 
+import com.google.gson.GsonBuilder
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -70,7 +71,11 @@ internal fun Route.api(db: DB) {
         }
         post("") {
             call.bracket {
-                val record = receive<Record>()
+//                val record = receive<Record>()
+                val record = receiveText().let {
+                    log.error { "POSTED $it"}
+                    GsonBuilder().create().fromJson(it, Record::class.java)
+                }
                 log.info { "UPDATE $record" }
                 db.updateRecord(record)
             }

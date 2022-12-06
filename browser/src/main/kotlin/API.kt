@@ -12,10 +12,12 @@ val mainScope = MainScope()
 
 private suspend fun Promise<Response>.assertStatus() = await().apply {
     console.log("STATUS", status, statusText)
-    check(200.toShort() == status) {
-        "Operation failed: $status  $url".also {
-            console.log(it)
-            window.alert(it)
+    status.toInt().also {
+        check(200 == it || 0 == it) {
+            "Operation failed: $status  $url".also {msg ->
+                console.log(msg)
+                window.alert(msg)
+            }
         }
     }
 }
@@ -42,8 +44,6 @@ private suspend fun get(url: String): Response =
         }.assertStatus()
 
 private suspend fun post(url: String, body: dynamic): Response {
-    console.log("POST BODY ", body, JSON.stringify(body))
-//    return window.fetch(url, RequestInit(method = "POST", body = body)).also {
     return window.fetch(
         url, RequestInit(
             method = "POST", body = JSON.stringify(body), headers = json(
