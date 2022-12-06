@@ -84,16 +84,18 @@ fun main() = runBlocking(Dispatchers.IO) {
 
         // Do stuff...
 
+        // This leaves the database in the same state as the seed data provided by the server (except for ids).
         suspend fun lawyerUp() {
+            list().forEach { record ->
+                delete(record.id)
+            }
+
             create(RecordWIP("Huey"))
             create(RecordWIP("Dewey"))
             create(RecordWIP("Louie"))
         }
 
-        list().forEach { record ->
-            delete(record.id)
-        }
-
+        // Start in a known state.
         lawyerUp()
 
         list().also { records ->
@@ -111,6 +113,9 @@ fun main() = runBlocking(Dispatchers.IO) {
         list().also { records ->
             require(3 == records.size)
         }
+
+        // End in a known state.
+        lawyerUp()
 
         Unit
     }
