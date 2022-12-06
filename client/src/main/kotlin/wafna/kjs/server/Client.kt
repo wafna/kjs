@@ -34,7 +34,7 @@ fun main() = runBlocking(Dispatchers.IO) {
     HttpClient(CIO) {
         expectSuccess = true
         install(Logging) {
-            level = LogLevel.INFO
+            level = LogLevel.ALL
         }
         install(ContentNegotiation) {
             gson {
