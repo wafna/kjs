@@ -13,13 +13,13 @@ import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import org.flywaydb.core.Flyway
 import wafna.kjs.Record
 import wafna.kjs.util.LazyLogger
-import java.lang.RuntimeException
 import java.lang.reflect.Type
 import java.nio.file.Files
 import java.nio.file.Path
@@ -69,10 +69,25 @@ fun main(): Unit = runBlocking {
     }
 }
 
-fun runServer(staticDir: Path, db: DB) {
-    val indexHtml = staticDir.resolve("index.html").also {
-        check(Files.isRegularFile(it))
+fun Route.accessLog(callback: Route.() -> Unit): Route =
+    createChild(object : RouteSelector() {
+        override fun evaluate(context: RoutingResolveContext, segmentIndex: Int): RouteSelectorEvaluation =
+            RouteSelectorEvaluation.Constant
+    }).also { accessLogRoute ->
+        accessLogRoute.intercept(ApplicationCallPipeline.Plugins) {
+            log.info { "${call.request.httpMethod.value} ${call.request.uri}" }
+            proceed()
+        }
+        callback(accessLogRoute)
     }
+
+fun runServer(staticDir: Path, db: DB) {
+
+    check(Files.isDirectory(staticDir))
+    val indexHtml = staticDir
+        .resolve("index.html")
+        .also { check(Files.isRegularFile(it)) }
+
     applicationEngineEnvironment {
         connector {
             port = 8081
@@ -99,9 +114,8 @@ fun runServer(staticDir: Path, db: DB) {
                                 context: JsonDeserializationContext?
                             ): UUID {
                                 try {
-                                    return json!!.asString.let {
-                                        UUID.fromString(it)
-                                    }
+                                    return json!!.asString
+                                        .let { UUID.fromString(it) }
                                 } catch (e: Throwable) {
                                     throw RuntimeException("Failed to serialize UUID from ${json?.asString}", e)
                                 }
@@ -111,20 +125,22 @@ fun runServer(staticDir: Path, db: DB) {
             }
 
             routing {
-                route("/api") {
-                    api(db)
-                }
-                route("/") {
-                    // https://ktor.io/docs/serving-static-content.html
-                    static {
-                        files(staticDir.toFile())
-                        default(indexHtml.toFile())
+                accessLog {
+                    route("/api") {
+                        api(db)
                     }
-                }
-                // This is necessary to show the UI in cases where we get URLs that are not understood on the server side,
-                // e.g. redirects from auth servers and path based routing (as opposed to hash based routing).
-                get("*") {
-                    call.respondFile(indexHtml.toFile())
+                    route("/") {
+                        // https://ktor.io/docs/serving-static-content.html
+                        static {
+                            files(staticDir.toFile())
+                            default(indexHtml.toFile())
+                        }
+                    }
+                    // This is necessary to show the UI in cases where we get URLs that are not understood on the server side,
+                    // e.g. redirects from auth servers and path based routing (as opposed to hash based routing).
+                    get("*") {
+                        call.respondFile(indexHtml.toFile())
+                    }
                 }
             }
         }
