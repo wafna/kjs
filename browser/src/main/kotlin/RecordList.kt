@@ -1,8 +1,11 @@
 import csstype.ClassName
 import csstype.Cursor
 import emotion.react.css
+import kotlinx.browser.window
 import kotlinx.coroutines.launch
+import org.w3c.dom.HTMLSpanElement
 import react.*
+import react.dom.events.MouseEvent
 import react.dom.html.ReactHTML
 
 external interface RecordEditorProps : Props {
@@ -107,8 +110,7 @@ val RecordList = FC<Props> {
                                     cursor = Cursor.pointer
                                 }
                                 +"∄"
-                                onClick = { e ->
-                                    e.preventDefault()
+                                onClick = preventDefault {
                                     mainScope.launch {
                                         API.deleteRecord(id)
                                         updateList()
@@ -122,9 +124,8 @@ val RecordList = FC<Props> {
                                 css {
                                     cursor = Cursor.pointer
                                 }
-                                +"∂"
-                                onClick = { e ->
-                                    e.preventDefault()
+                                +"∆"
+                                onClick = preventDefault {
                                     editedRecord = record
                                 }
                             }
@@ -154,7 +155,6 @@ val RecordList = FC<Props> {
                     record = editedRecord
                     updateRecord = { record ->
                         mainScope.launch {
-                            console.log("update record", record)
                             API.updateRecord(record)
                             updateList()
                             editedRecord = null
@@ -166,7 +166,6 @@ val RecordList = FC<Props> {
                     record = null
                     createRecord = { record ->
                         mainScope.launch {
-                            console.log("update record", record)
                             API.createRecord(record)
                             updateList()
                             createNew = false

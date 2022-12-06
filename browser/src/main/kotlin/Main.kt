@@ -13,6 +13,11 @@ inline fun PropsWithClassName.css(vararg classNames: ClassName?) {
     className = emotion.css.ClassName(classNames = classNames) {}
 }
 
+fun preventDefault(op: () -> Unit): (react.dom.events.MouseEvent<*, *>) -> Unit = { e ->
+    e.preventDefault()
+    op()
+}
+
 val Loading = FC<Props> {
     ReactHTML.h1 { +"Loading..." }
 }
@@ -20,6 +25,7 @@ val Loading = FC<Props> {
 typealias UUID = String
 
 fun main() {
-    val container = document.getElementById("root") ?: error("Couldn't find root container!")
-    createRoot(container).render(App.create())
+    document.getElementById("root")?.also {
+        createRoot(it).render(App.create())
+    } ?: error("Couldn't find root container!")
 }
