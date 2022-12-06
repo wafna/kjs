@@ -4,13 +4,21 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import java.util.UUID
+import wafna.kjs.Record
+import wafna.kjs.RecordWIP
+import wafna.kjs.util.LazyLogger
+import java.util.*
+
+private object Client
+
+private val log = LazyLogger(Client::class)
 
 private fun HeadersBuilder.acceptJson() =
     append(HttpHeaders.Accept, "application/json")
@@ -20,10 +28,9 @@ private fun HeadersBuilder.sendJson() =
 
 // For some reason, this is getting 404s on many calls (the ones with bodies) even though the calls are clearly working!
 private fun HttpResponse.checkStatus(): HttpResponse = apply {
+    log.info { "CHECK STATUS: ${request.method.value} ${request.url} $status" }
     check(status.isSuccess()) { "Request failed: ${request.method.value} ${request.url} $status" }
 }
-
-data class Record(val id: UUID, val data: String)
 
 /**
  * Should be an integration test, but is just an ad hoc exercise of the API.
@@ -31,6 +38,9 @@ data class Record(val id: UUID, val data: String)
 fun main() = runBlocking(Dispatchers.IO) {
 
     HttpClient(CIO) {
+        install(Logging) {
+            level = LogLevel.INFO
+        }
         install(ContentNegotiation) {
             gson {
                 serializeNulls()
@@ -66,7 +76,7 @@ fun main() = runBlocking(Dispatchers.IO) {
             }
             .checkStatus()
 
-        suspend fun create(record: Record) = client
+        suspend fun create(record: RecordWIP) = client
             .put("$baseURL/record") {
                 headers {
                     sendJson()
@@ -77,22 +87,34 @@ fun main() = runBlocking(Dispatchers.IO) {
             //.checkStatus()
             .body<Record>()
 
-        suspend fun delete(id: String) = client
+        suspend fun delete(id: UUID) = client
             .delete("$baseURL/record?id=$id")
             .checkStatus()
 
         // Do stuff...
 
+        suspend fun lawyerUp() {
+            create(RecordWIP("Huey"))
+            create(RecordWIP("Dewey"))
+            create(RecordWIP("Louie"))
+        }
+
+        list().forEach { record ->
+            delete(record.id)
+        }
+
+        lawyerUp()
+
         list().also { records ->
             require(3 == records.size)
-            update(records[0].copy(data = "UPDATED-${UUID.randomUUID()}"))
+            update(records[0].let { it.copy(data = "UPDATED-${it.data}") })
         }
         list().also { records ->
             require(3 == records.size)
-            delete(records[0].id.toString())
+            delete(records[0].id)
             require(2 == list().size)
         }
-        create(Record(UUID.randomUUID(), "CREATED")).also {
+        create(RecordWIP("CREATED")).also {
             println("CREATE $it")
         }
         list().also { records ->

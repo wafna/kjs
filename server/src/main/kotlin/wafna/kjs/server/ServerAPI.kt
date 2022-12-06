@@ -1,17 +1,13 @@
 package wafna.kjs.server
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import wafna.kjs.Record
+import wafna.kjs.RecordWIP
 import wafna.kjs.util.LazyLogger
-import java.lang.reflect.Type
 import java.util.*
 
 fun ApplicationCall.ok() = response.status(HttpStatusCode.OK)
@@ -57,8 +53,7 @@ internal fun Route.api(db: DB) {
         }
         put("") {
             call.bracket {
-                val record = receive<Record>()
-                    .copy(id = UUID.randomUUID())
+                val record = receive<RecordWIP>().commit()
                 log.info { "CREATE $record" }
                 db.createRecord(record)
                 respond(record)

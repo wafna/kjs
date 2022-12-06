@@ -99,6 +99,6 @@ object API {
     suspend fun updateRecord(record: Record) =
         post("$apiRoot/update", record)
 
-    suspend fun createRecord(data: String) =
-        put("$apiRoot/create", Record("51682216-4758-4a5a-aa30-9bf9cd225765", data))
+    suspend fun createRecord(record: RecordWIP) =
+        put("$apiRoot/create", record)
 }

@@ -19,6 +19,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import org.flywaydb.core.Flyway
 import wafna.kjs.Record
+import wafna.kjs.RecordWIP
 import wafna.kjs.util.LazyLogger
 import java.lang.reflect.Type
 import java.nio.file.Files
@@ -43,7 +44,7 @@ fun main(): Unit = runBlocking {
         check(Files.isDirectory(it)) { "Static directory not found: ${it.absolutePathString()}" }
     }
     val config = HikariConfig().apply {
-        jdbcUrl = "jdbc:h2:mem:kjs"
+        jdbcUrl = "jdbc:h2:mem:kjs;DB_CLOSE_DELAY=-1"
         username = "sa"
         password = ""
         maximumPoolSize = 1
@@ -61,13 +62,16 @@ fun main(): Unit = runBlocking {
 
         val db = DB(dataSource)
 
-        db.createRecord(Record(UUID.randomUUID(), "Huey"))
-        db.createRecord(Record(UUID.randomUUID(), "Dewey"))
-        db.createRecord(Record(UUID.randomUUID(), "Louie"))
+        db.createRecord(RecordWIP("Huey").commit())
+        db.createRecord(RecordWIP("Dewey").commit())
+        db.createRecord(RecordWIP("Louie").commit())
 
         runServer(staticDir, db)
     }
 }
+
+private object Access
+private val accessLog = LazyLogger(Access::class)
 
 fun Route.accessLog(callback: Route.() -> Unit): Route =
     createChild(object : RouteSelector() {
@@ -75,7 +79,7 @@ fun Route.accessLog(callback: Route.() -> Unit): Route =
             RouteSelectorEvaluation.Constant
     }).also { accessLogRoute ->
         accessLogRoute.intercept(ApplicationCallPipeline.Plugins) {
-            log.info { "${call.request.httpMethod.value} ${call.request.uri}" }
+            accessLog.info { "${call.request.httpMethod.value} ${call.request.uri}" }
             proceed()
         }
         callback(accessLogRoute)
