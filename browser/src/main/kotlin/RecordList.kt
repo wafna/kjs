@@ -135,6 +135,7 @@ val RecordList = FC<Props> {
                         mainScope.launch {
                             console.log("update record", record)
                             API.updateRecord(record)
+                            updateList()
                             editedRecord = null
                         }
                     }

@@ -14,7 +14,7 @@ private suspend fun Promise<Response>.assertStatus() = await().apply {
     console.log("STATUS", status, statusText)
     status.toInt().also {
         check(200 == it || 0 == it) {
-            "Operation failed: $status  $url".also {msg ->
+            "Operation failed: $status  $url".also { msg ->
                 console.log(msg)
                 window.alert(msg)
             }
@@ -38,10 +38,7 @@ private suspend fun get(url: String): Response =
                 "pragma" to "no-cache"
             )
         )
-    )
-        .also {
-            console.log("GET $url")
-        }.assertStatus()
+    ).assertStatus()
 
 private suspend fun post(url: String, body: dynamic): Response {
     return window.fetch(
@@ -63,9 +60,7 @@ private suspend fun put(url: String, body: dynamic): Response =
                 "Accept" to "application/json"
             )
         )
-    ).also {
-        console.log("PUT $url")
-    }.assertStatus()
+    ).assertStatus()
 
 private suspend fun delete(url: String): Response =
     window.fetch(
