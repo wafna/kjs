@@ -1,6 +1,6 @@
 import csstype.ClassName
 import kotlinx.browser.document
-import kotlinx.serialization.Serializable
+import org.w3c.dom.events.MouseEvent
 import react.FC
 import react.Props
 import react.PropsWithClassName

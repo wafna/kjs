@@ -1,4 +1,6 @@
 import csstype.ClassName
+import csstype.Cursor
+import emotion.react.css
 import kotlinx.coroutines.launch
 import react.*
 import react.dom.html.ReactHTML
@@ -6,7 +8,7 @@ import react.dom.html.ReactHTML
 external interface RecordEditorProps : Props {
     var record: Record?
     var updateRecord: (Record) -> Unit
-    var createRecord: (String) -> Unit
+    var createRecord: (RecordWIP) -> Unit
 }
 
 val RecordEditor = FC<RecordEditorProps> { props ->
@@ -39,7 +41,7 @@ val RecordEditor = FC<RecordEditorProps> { props ->
                     +"Create"
                     onClick = {
                         it.preventDefault()
-                        props.createRecord(data)
+                        props.createRecord(RecordWIP(data))
                     }
                 } else {
                     +"Update"
@@ -57,6 +59,8 @@ val RecordList = FC<Props> {
     var records: List<Record>? by useState(null)
 
     var editedRecord: Record? by useState(null)
+
+    var createNew by useState(false)
 
     suspend fun updateList() {
         records = API.listRecords()
@@ -99,8 +103,12 @@ val RecordList = FC<Props> {
                             css(ClassName(col(1)))
                             key = id
                             ReactHTML.span {
-                                +"❌"
-                                onClick = {
+                                css {
+                                    cursor = Cursor.pointer
+                                }
+                                +"∄"
+                                onClick = { e ->
+                                    e.preventDefault()
                                     mainScope.launch {
                                         API.deleteRecord(id)
                                         updateList()
@@ -111,8 +119,12 @@ val RecordList = FC<Props> {
                         ReactHTML.div {
                             css(ClassName(col(1)))
                             ReactHTML.span {
-                                +"\uD83D\uDD89"
-                                onClick = {
+                                css {
+                                    cursor = Cursor.pointer
+                                }
+                                +"∂"
+                                onClick = { e ->
+                                    e.preventDefault()
                                     editedRecord = record
                                 }
                             }
@@ -128,6 +140,15 @@ val RecordList = FC<Props> {
                     }
                 }
             }
+            ReactHTML.button {
+                css(ClassName("btn btn-primary"))
+                ReactHTML.em { +"+" }
+                onClick = { e ->
+                    e.preventDefault()
+                    createNew = true
+                }
+            }
+
             if (null != editedRecord) {
                 RecordEditor {
                     record = editedRecord
@@ -137,6 +158,18 @@ val RecordList = FC<Props> {
                             API.updateRecord(record)
                             updateList()
                             editedRecord = null
+                        }
+                    }
+                }
+            } else if (createNew) {
+                RecordEditor {
+                    record = null
+                    createRecord = { record ->
+                        mainScope.launch {
+                            console.log("update record", record)
+                            API.createRecord(record)
+                            updateList()
+                            createNew = false
                         }
                     }
                 }

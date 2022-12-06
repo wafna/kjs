@@ -17,7 +17,9 @@ val App = FC<Props> {
             +"Kotlin Client Server (React)"
         }
         div {
-            RecordList { }
+            Chrome {
+                page = RecordList
+            }
         }
     }
 }
