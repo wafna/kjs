@@ -5,6 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.utils.io.*
 import wafna.kjs.Record
 import wafna.kjs.RecordWIP
 import wafna.kjs.util.LazyLogger
@@ -18,13 +19,21 @@ private object API
 
 private val log = LazyLogger(API::class)
 
-suspend fun ApplicationCall.bracket(block: suspend ApplicationCall.() -> Unit) {
+/**
+ * Sets the given status code into the response if the block returns normally.
+ */
+suspend fun ApplicationCall.bracket(
+    status: HttpStatusCode = HttpStatusCode.OK,
+    block: suspend ApplicationCall.() -> Unit
+) {
     try {
         block()
+        response.status(status)
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Throwable) {
         log.error(e) { "Call bracket." }
         internalServerError()
-        throw e
     }
 }
 

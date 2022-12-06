@@ -26,18 +26,13 @@ private fun HeadersBuilder.acceptJson() =
 private fun HeadersBuilder.sendJson() =
     append(HttpHeaders.ContentType, "application/json")
 
-// For some reason, this is getting 404s on many calls (the ones with bodies) even though the calls are clearly working!
-private fun HttpResponse.checkStatus(): HttpResponse = apply {
-    log.info { "CHECK STATUS: ${request.method.value} ${request.url} $status" }
-    check(status.isSuccess()) { "Request failed: ${request.method.value} ${request.url} $status" }
-}
-
 /**
  * Should be an integration test, but is just an ad hoc exercise of the API.
  */
 fun main() = runBlocking(Dispatchers.IO) {
 
     HttpClient(CIO) {
+        expectSuccess = true
         install(Logging) {
             level = LogLevel.INFO
         }
@@ -58,7 +53,6 @@ fun main() = runBlocking(Dispatchers.IO) {
                     acceptJson()
                 }
             }
-            .checkStatus()
             .body<List<Record>>()
             .also { records ->
                 println(
@@ -74,7 +68,6 @@ fun main() = runBlocking(Dispatchers.IO) {
                 }
                 setBody(record)
             }
-            .checkStatus()
 
         suspend fun create(record: RecordWIP) = client
             .put("$baseURL/record") {
@@ -84,12 +77,10 @@ fun main() = runBlocking(Dispatchers.IO) {
                 }
                 setBody(record)
             }
-            //.checkStatus()
             .body<Record>()
 
         suspend fun delete(id: UUID) = client
             .delete("$baseURL/record?id=$id")
-            .checkStatus()
 
         // Do stuff...
 
