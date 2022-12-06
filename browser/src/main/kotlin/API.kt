@@ -11,7 +11,6 @@ import kotlin.js.json
 val mainScope = MainScope()
 
 private suspend fun Promise<Response>.assertStatus() = await().apply {
-    console.log("STATUS", status, statusText)
     status.toInt().also {
         check(200 == it || 0 == it) {
             "Operation failed: $status  $url".also { msg ->
