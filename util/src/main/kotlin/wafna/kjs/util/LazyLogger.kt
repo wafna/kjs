@@ -4,19 +4,23 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 
+/**
+ * Avoids creation of the error message unless the
+ */
+@Suppress("unused")
 class LazyLogger(val log: Logger) {
     constructor(kClass: KClass<*>) : this(LoggerFactory.getLogger(kClass.java))
     constructor(name: String) : this(LoggerFactory.getLogger(name))
 
-    fun error(msg: () -> String) {
+    inline fun error(msg: () -> String) {
         if (log.isErrorEnabled) log.error(msg())
     }
 
-    fun error(e: Throwable, msg: () -> String) {
+    inline fun error(e: Throwable, msg: () -> String) {
         if (log.isErrorEnabled) log.error(msg(), e)
     }
 
-    fun warn(msg: () -> String) {
+    inline fun warn(msg: () -> String) {
         if (log.isWarnEnabled) log.warn(msg())
     }
 
@@ -24,12 +28,11 @@ class LazyLogger(val log: Logger) {
         if (log.isWarnEnabled) msg().also { log.warn(it) }
     }
 
-    @Suppress("unused")
-    fun warn(e: Throwable, msg: () -> String) {
+    inline fun warn(e: Throwable, msg: () -> String) {
         if (log.isWarnEnabled) log.warn(msg(), e)
     }
 
-    fun info(msg: () -> String) {
+    inline fun info(msg: () -> String) {
         if (log.isInfoEnabled) log.info(msg())
     }
 
@@ -37,11 +40,11 @@ class LazyLogger(val log: Logger) {
         if (log.isInfoEnabled) msg().also { log.info(it) }
     }
 
-    fun info(e: Throwable, msg: () -> String) {
+    inline fun info(e: Throwable, msg: () -> String) {
         if (log.isInfoEnabled) log.info(msg(), e)
     }
 
-    fun debug(msg: () -> String) {
+    inline fun debug(msg: () -> String) {
         if (log.isDebugEnabled) log.debug(msg())
     }
 
@@ -49,17 +52,15 @@ class LazyLogger(val log: Logger) {
         if (log.isDebugEnabled) msg().also { log.debug(it) }
     }
 
-    @Suppress("unused")
-    fun debug(e: Throwable, msg: () -> String) {
+    inline fun debug(e: Throwable, msg: () -> String) {
         if (log.isDebugEnabled) log.debug(msg(), e)
     }
 
-    fun trace(msg: () -> String) {
+    inline fun trace(msg: () -> String) {
         if (log.isTraceEnabled) log.trace(msg())
     }
 
-    @Suppress("unused")
-    fun trace(e: Throwable, msg: () -> String) {
+    inline fun trace(e: Throwable, msg: () -> String) {
         if (log.isTraceEnabled) log.trace(msg(), e)
     }
 }

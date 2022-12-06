@@ -18,7 +18,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import org.flywaydb.core.Flyway
-import wafna.kjs.Record
 import wafna.kjs.RecordWIP
 import wafna.kjs.util.LazyLogger
 import java.lang.reflect.Type
@@ -73,6 +72,9 @@ fun main(): Unit = runBlocking {
 private object Access
 private val accessLog = LazyLogger(Access::class)
 
+/**
+ * Wrap this around a route to get a look at the activity on that route.
+ */
 fun Route.accessLog(callback: Route.() -> Unit): Route =
     createChild(object : RouteSelector() {
         override fun evaluate(context: RoutingResolveContext, segmentIndex: Int): RouteSelectorEvaluation =

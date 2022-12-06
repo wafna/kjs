@@ -20,8 +20,7 @@ class DB(private val dataSource: HikariDataSource) {
             ps.executeQuery().use { rs ->
                 mutableListOf<Record>().also { records ->
                     while (rs.next()) {
-                        var ix = 0
-                        records += Record(rs.getObject(++ix) as UUID, rs.getString(++ix))
+                        records += Record(rs.getObject(1) as UUID, rs.getString(2))
                     }
                 }
             }

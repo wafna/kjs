@@ -91,14 +91,14 @@ object API {
 
     // Get all the records.
     suspend fun listRecords(): List<Record> =
-        json(get("$apiRoot/list"))
+        json(get("$apiRoot/record"))
 
     suspend fun deleteRecord(id: UUID) =
-        delete("$apiRoot/delete?id=$id")
+        delete("$apiRoot/record?id=$id")
 
     suspend fun updateRecord(record: Record) =
-        post("$apiRoot/update", record)
+        post("$apiRoot/record", record)
 
     suspend fun createRecord(record: RecordWIP) =
-        put("$apiRoot/create", record)
+        put("$apiRoot/record", record)
 }
