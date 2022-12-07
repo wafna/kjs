@@ -14,18 +14,15 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import org.flywaydb.core.Flyway
 import wafna.kjs.RecordWIP
 import wafna.kjs.util.LazyLogger
+import java.io.File
 import java.lang.reflect.Type
 import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.*
-import kotlin.io.path.absolutePathString
 
 private object Server
 
@@ -37,10 +34,21 @@ fun main(): Unit = runBlocking {
             log.warn { "Shutting down." }
         }
     })
-    // NB this directory will not be found if you run the server from IDEA because the working directory will be
-    // the root of the top level project.
-    val staticDir = Paths.get("../browser/build/distributions").also {
-        check(Files.isDirectory(it)) { "Static directory not found: ${it.absolutePathString()}" }
+    // The working directory will be different (by default) depending on whether it is run from Gradle or IDEA.
+    val staticDir = "browser/build/distributions/".let { basePath ->
+        val fromGradle = File("../$basePath")
+        if (fromGradle.isDirectory) {
+            fromGradle
+        } else {
+            val fromIDEA = File(basePath)
+            if (fromIDEA.isDirectory) {
+                fromIDEA
+            } else {
+                throw java.lang.RuntimeException("Cannot find static directory.")
+            }
+        }
+    }.also {
+        log.info { "Serving static directory: ${it.canonicalPath}"}
     }
     val config = HikariConfig().apply {
         jdbcUrl = "jdbc:h2:mem:kjs;DB_CLOSE_DELAY=-1"
@@ -87,12 +95,12 @@ fun Route.accessLog(callback: Route.() -> Unit): Route =
         callback(accessLogRoute)
     }
 
-fun runServer(staticDir: Path, db: DB) {
+fun runServer(staticDir: File, db: DB) {
 
-    check(Files.isDirectory(staticDir))
+    check(staticDir.isDirectory)
     val indexHtml = staticDir
         .resolve("index.html")
-        .also { check(Files.isRegularFile(it)) }
+        .also { check(Files.isRegularFile(it.toPath())) }
 
     applicationEngineEnvironment {
         connector {
@@ -139,14 +147,9 @@ fun runServer(staticDir: Path, db: DB) {
                     route("/") {
                         // https://ktor.io/docs/serving-static-content.html
                         static {
-                            files(staticDir.toFile())
-                            default(indexHtml.toFile())
+                            files(staticDir)
+                            default(indexHtml)
                         }
-                    }
-                    // This is necessary to show the UI in cases where we get URLs that are not understood on the server side,
-                    // e.g. redirects from auth servers and path based routing (as opposed to hash based routing).
-                    get("*") {
-                        call.respondFile(indexHtml.toFile())
                     }
                 }
             }

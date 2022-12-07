@@ -103,9 +103,9 @@ val RecordList = FC<Props> {
                             css(ClassName(col(1)))
                             key = id
                             h.span {
-                                css {
-                                    cursor = Cursor.pointer
-                                }
+//                                css {
+//                                    cursor = Cursor.pointer
+//                                }
                                 +"∄"
                                 onClick = preventDefault {
                                     mainScope.launch {
@@ -118,9 +118,9 @@ val RecordList = FC<Props> {
                         h.div {
                             css(ClassName(col(1)))
                             h.span {
-                                css {
-                                    cursor = Cursor.pointer
-                                }
+//                                css {
+//                                    cursor = Cursor.pointer
+//                                }
                                 +"∆"
                                 onClick = preventDefault {
                                     editedRecord = record
