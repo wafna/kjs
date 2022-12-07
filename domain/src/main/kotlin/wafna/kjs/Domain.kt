@@ -1,6 +1,6 @@
 package wafna.kjs
 
-import java.util.UUID
+import java.util.*
 
 private fun newID(): UUID = UUID.randomUUID()
 

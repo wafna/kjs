@@ -2,9 +2,9 @@ import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.await
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.w3c.fetch.*
+import org.w3c.fetch.RequestInit
+import org.w3c.fetch.Response
 import kotlin.js.Promise
 import kotlin.js.json
 

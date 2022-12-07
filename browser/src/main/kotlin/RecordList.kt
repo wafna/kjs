@@ -4,14 +4,14 @@ import emotion.react.css
 import kotlinx.coroutines.launch
 import react.*
 import react.dom.html.ReactHTML.button
-import react.dom.html.ReactHTML.small
-import react.dom.html.ReactHTML.strong
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.em
 import react.dom.html.ReactHTML.form
 import react.dom.html.ReactHTML.input
 import react.dom.html.ReactHTML.label
+import react.dom.html.ReactHTML.small
 import react.dom.html.ReactHTML.span
+import react.dom.html.ReactHTML.strong
 
 external interface RecordEditorProps : Props {
     var record: Record?
