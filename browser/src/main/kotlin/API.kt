@@ -2,12 +2,13 @@ import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.await
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.w3c.fetch.*
 import kotlin.js.Promise
 import kotlin.js.json
 
-// Used throughout to wrap api calls.
+// Used throughout to wrap api calls and effects.
 val mainScope = MainScope()
 
 private suspend fun Promise<Response>.assertStatus() = await().apply {
@@ -21,16 +22,11 @@ private suspend fun Promise<Response>.assertStatus() = await().apply {
     }
 }
 
-private suspend fun fetch(method: String, url: String, body: dynamic = null) {
-
-}
-
-// Verbiage
-
-private suspend fun get(url: String): Response =
+private suspend fun fetch(method: String, url: String, body: dynamic = null): Response =
     window.fetch(
         url, RequestInit(
-            method = "GET", body = null,
+            method = method,
+            body = body,
             headers = json(
                 "Content-Type" to "application/json",
                 "Accept" to "application/json",
@@ -39,37 +35,19 @@ private suspend fun get(url: String): Response =
         )
     ).assertStatus()
 
-private suspend fun post(url: String, body: dynamic): Response {
-    return window.fetch(
-        url, RequestInit(
-            method = "POST", body = JSON.stringify(body), headers = json(
-                "Content-Type" to "application/json",
-                "Accept" to "application/json",
-                "pragma" to "no-cache"
-            ), cache = RequestCache.NO_CACHE, mode = RequestMode.NO_CORS
-        )
-    ).assertStatus()
-}
+// Verbiage: expressing the semantics of each method.
+
+private suspend fun get(url: String): Response =
+    fetch("GET", url)
 
 private suspend fun put(url: String, body: dynamic): Response =
-    window.fetch(
-        url, RequestInit(
-            method = "PUT", body = JSON.stringify(body), headers = json(
-                "Content-Type" to "application/json",
-                "Accept" to "application/json"
-            )
-        )
-    ).assertStatus()
+    fetch("PUT", url, JSON.stringify(body))
+
+private suspend fun post(url: String, body: dynamic): Response =
+    fetch("POST", url, JSON.stringify(body))
 
 private suspend fun delete(url: String): Response =
-    window.fetch(
-        url, RequestInit(
-            method = "DELETE", headers = json(
-                "Content-Type" to "application/json",
-                "Accept" to "application/json"
-            )
-        )
-    ).assertStatus()
+    fetch("DELETE", url)
 
 /**
  * Serialize object from json in response.
