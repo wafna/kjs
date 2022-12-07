@@ -1,7 +1,8 @@
 # Demo Kotlin/JS Project
 
 * Server using Netty in Ktor.
-* Client using React in Kotlin/JS.
+* Browser using React in Kotlin/JS.
+* Client in Ktor.
 * REST API
 * H2 database with Flyway.
 
