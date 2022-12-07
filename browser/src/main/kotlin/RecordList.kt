@@ -3,15 +3,7 @@ import csstype.Cursor
 import emotion.react.css
 import kotlinx.coroutines.launch
 import react.*
-import react.dom.html.ReactHTML.button
-import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.em
-import react.dom.html.ReactHTML.form
-import react.dom.html.ReactHTML.input
-import react.dom.html.ReactHTML.label
-import react.dom.html.ReactHTML.small
-import react.dom.html.ReactHTML.span
-import react.dom.html.ReactHTML.strong
+import react.dom.html.ReactHTML as h
 
 external interface RecordEditorProps : Props {
     var record: Record?
@@ -20,31 +12,29 @@ external interface RecordEditorProps : Props {
 }
 
 val RecordEditor = FC<RecordEditorProps> { props ->
-    val record = props.record
 
+    val record = props.record
     var data by useState(record?.data ?: "")
 
-    form {
-        div {
+    h.form {
+        h.div {
             val ctrlId = "the-data"
             css(ClassName("form-group"))
-            label {
+            h.label {
                 +"Data"
                 htmlFor = ctrlId
             }
-            input {
+            h.input {
                 id = ctrlId
                 css(ClassName("form-control"))
                 placeholder = "..."
                 value = data
-                onChange = { e ->
-                    data = e.target.value
-                }
+                onChange = { data = it.target.value }
             }
         }
-        div {
+        h.div {
             if (null == record) {
-                button {
+                h.button {
                     css(ClassName("btn btn-primary"))
                     +"Create"
                     onClick = preventDefault {
@@ -52,7 +42,7 @@ val RecordEditor = FC<RecordEditorProps> { props ->
                     }
                 }
             } else {
-                button {
+                h.button {
                     css(classNames("btn", "btn-primary"))
                     +"Update"
                     onClick = preventDefault {
@@ -82,37 +72,37 @@ val RecordList = FC<Props> {
 
     when (records) {
         null -> Loading
-        else -> div {
-            div {
+        else -> h.div {
+            h.div {
                 css(ClassName("container"))
                 fun col(n: Int) = "col-lg-$n"
-                div {
+                h.div {
                     css(ClassName("row"))
-                    div {
+                    h.div {
                         css(ClassName(col(1)))
-                        small { +"delete" }
+                        h.small { +"delete" }
                     }
-                    div {
+                    h.div {
                         css(ClassName(col(1)))
-                        small { +"modify" }
+                        h.small { +"modify" }
                     }
-                    div {
+                    h.div {
                         css(ClassName(col(5)))
-                        strong { +"Id" }
+                        h.strong { +"Id" }
                     }
-                    div {
+                    h.div {
                         css(ClassName(col(5)))
-                        strong { +"Data" }
+                        h.strong { +"Data" }
                     }
                 }
                 records!!.forEach { record ->
                     val id = record.id
-                    div {
+                    h.div {
                         css(ClassName("row"))
-                        div {
+                        h.div {
                             css(ClassName(col(1)))
                             key = id
-                            span {
+                            h.span {
                                 css {
                                     cursor = Cursor.pointer
                                 }
@@ -125,9 +115,9 @@ val RecordList = FC<Props> {
                                 }
                             }
                         }
-                        div {
+                        h.div {
                             css(ClassName(col(1)))
-                            span {
+                            h.span {
                                 css {
                                     cursor = Cursor.pointer
                                 }
@@ -137,22 +127,21 @@ val RecordList = FC<Props> {
                                 }
                             }
                         }
-                        div {
+                        h.div {
                             css(ClassName(col(5)))
-                            span { +record.id }
+                            h.span { +record.id }
                         }
-                        div {
+                        h.div {
                             css(ClassName(col(5)))
-                            span { +record.data }
+                            h.span { +record.data }
                         }
                     }
                 }
             }
-            button {
+            h.button {
                 css(ClassName("btn btn-primary"))
-                em { +"+" }
-                onClick = { e ->
-                    e.preventDefault()
+                h.em { +"+" }
+                onClick = preventDefault {
                     createNew = true
                 }
             }

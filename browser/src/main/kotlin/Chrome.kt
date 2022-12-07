@@ -1,7 +1,7 @@
 import csstype.ClassName
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML as h
 
 external interface NavItemProps : Props {
     var name: String
@@ -10,9 +10,9 @@ external interface NavItemProps : Props {
 }
 
 val NavItem = FC<NavItemProps> { props ->
-    ReactHTML.li {
+    h.li {
         css(classNames("nav-item", if (props.active) "active" else null))
-        ReactHTML.a {
+        h.a {
             css(ClassName("nav-link"))
             +props.name
             href = "#${props.href}"
@@ -21,9 +21,9 @@ val NavItem = FC<NavItemProps> { props ->
 }
 
 val Chrome = FC<Props> {
-    ReactHTML.nav {
+    h.nav {
         css(ClassName("navbar navbar-expand-lg navbar-light bg-light"))
-        ReactHTML.ul {
+        h.ul {
             css(ClassName("navbar-nav mr-auto"))
             NavItem {
                 name = "REST"
@@ -31,8 +31,8 @@ val Chrome = FC<Props> {
                 active = false
             }
             NavItem {
-                name = "Other"
-                href = "other"
+                name = "Canvas"
+                href = "canvas"
                 active = true
             }
         }

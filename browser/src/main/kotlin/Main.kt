@@ -5,7 +5,7 @@ import react.Props
 import react.PropsWithClassName
 import react.create
 import react.dom.client.createRoot
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML as h
 
 // Odd that this overload was not provided.
 inline fun PropsWithClassName.css(vararg classNames: ClassName?) {
@@ -22,7 +22,7 @@ fun classNames(vararg className: String?): ClassName =
     ClassName(className.filterNotNull().joinToString(" "))
 
 val Loading = FC<Props> {
-    ReactHTML.h1 { +"Loading..." }
+    h.h1 { +"Loading..." }
 }
 
 fun main() {

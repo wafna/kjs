@@ -3,15 +3,9 @@ import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML
-import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.h1
+import react.dom.html.ReactHTML as h
 import react.useEffectOnce
 import react.useState
-
-val Other = FC<Props> {
-    ReactHTML.h3 { +"Nav and permalink to here." }
-}
 
 /**
  * Get the current hash component of the window's address, stripping the superfluous leading '#'.
@@ -38,16 +32,19 @@ val App = FC<Props> {
         updateHash()
     }
 
-    div {
+    h.div {
         css(ClassName("container"))
 
-        h1 {
+        h.h1 {
             +"Kotlin Client Server (React)"
         }
-        div {
+        h.div {
             Chrome {}
             when (hash) {
-                "other" -> Other {}
+                "canvas" -> Canvas {
+                    width = 300.0
+                    height = 300.0
+                }
                 "rest" -> RecordList {}
                 else -> RecordList {}
             }
