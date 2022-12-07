@@ -1,6 +1,4 @@
 import csstype.ClassName
-import csstype.Cursor
-import emotion.react.css
 import kotlinx.coroutines.launch
 import react.*
 import react.dom.html.ReactHTML as h
@@ -103,9 +101,7 @@ val RecordList = FC<Props> {
                             css(ClassName(col(1)))
                             key = id
                             h.span {
-//                                css {
-//                                    cursor = Cursor.pointer
-//                                }
+                                css(ClassName("clickable"))
                                 +"∄"
                                 onClick = preventDefault {
                                     mainScope.launch {
@@ -118,9 +114,7 @@ val RecordList = FC<Props> {
                         h.div {
                             css(ClassName(col(1)))
                             h.span {
-//                                css {
-//                                    cursor = Cursor.pointer
-//                                }
+                                css(ClassName("clickable"))
                                 +"∆"
                                 onClick = preventDefault {
                                     editedRecord = record
