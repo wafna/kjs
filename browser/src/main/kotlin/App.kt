@@ -16,6 +16,22 @@ private fun currentHash() = window.location.hash.let { hash ->
     } else hash
 }
 
+external interface NavItemProps : Props {
+    var name: String
+    var href: String
+    var active: Boolean
+}
+
+val NavItem = FC<NavItemProps> { props ->
+    h.li {
+        css(classNames("nav-item", if (props.active) "active" else null))
+        h.a {
+            css(ClassName("nav-link"))
+            +props.name
+            href = "#${props.href}"
+        }
+    }
+}
 
 val App = FC<Props> {
 
@@ -26,9 +42,7 @@ val App = FC<Props> {
     }
 
     useEffectOnce {
-        window.onhashchange = {
-            updateHash()
-        }
+        window.onhashchange = { updateHash() }
         updateHash()
     }
 
@@ -39,12 +53,28 @@ val App = FC<Props> {
             +"Kotlin Client Server (React)"
         }
         h.div {
-            Chrome {}
+            h.nav {
+                css(ClassName("navbar navbar-expand-lg navbar-light bg-light"))
+                h.ul {
+                    css(ClassName("navbar-nav mr-auto"))
+                    NavItem {
+                        name = "REST"
+                        href = "rest"
+                        active = false
+                    }
+                    NavItem {
+                        name = "Timer"
+                        href = "timer"
+                        active = true
+                    }
+                }
+            }
             when (hash) {
-                "canvas" -> Canvas {
+                "timer" -> Canvas {
                     width = 300.0
                     height = 300.0
                 }
+
                 "rest" -> RecordList {}
                 else -> RecordList {}
             }

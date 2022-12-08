@@ -16,15 +16,15 @@ val RecordEditor = FC<RecordEditorProps> { props ->
 
     h.form {
         h.div {
-            val ctrlId = "the-data"
             css(ClassName("form-group"))
+            val ctrlId = "the-data"
             h.label {
                 +"Data"
                 htmlFor = ctrlId
             }
             h.input {
-                id = ctrlId
                 css(ClassName("form-control"))
+                id = ctrlId
                 placeholder = "..."
                 value = data
                 onChange = { data = it.target.value }

@@ -4,45 +4,44 @@ import csstype.LineStyle
 import csstype.px
 import emotion.react.css
 import kotlinx.browser.document
+import kotlinx.js.timers.Timeout
+import kotlinx.js.timers.setInterval
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
 import react.FC
 import react.Props
-import react.useEffectOnce
+import react.useEffect
 import kotlin.math.PI
+import kotlin.random.Random
 import react.dom.html.ReactHTML as h
 
 external interface CanvasProps : Props {
     var height: Double
     var width: Double
 }
+
 val Canvas = FC<CanvasProps> { props ->
 
     val canvasId = "myCanvas"
 
-    useEffectOnce {
-        val cx = props.width / 2.0
-        val cy = props.height / 2.0
-        val canvas = document.getElementById(canvasId) as HTMLCanvasElement
-        (canvas.getContext("2d") as CanvasRenderingContext2D).apply {
-            lineWidth = 1.0
-            strokeStyle = "#00ffAA"
-            arc(cx, cy, cx / 2.0, 0.0, 2 * PI)
-            stroke()
-            moveTo(cx / 2, cy / 2)
-            lineTo(3 * cx / 2, 3 * cy / 2)
-            stroke()
-            moveTo(cx / 2, 3 * cy / 2)
-            lineTo(3 * cx / 2, cy / 2)
-            stroke()
-            fillStyle = "#ff0088"
-            fillRect(3 * cx / 4, 3 * cy / 4, cx / 2, cy / 2)
-        }
+    var timer: Timeout? = null
 
+    useEffect {
+        timer = setInterval({
+            val c1 = document.getElementById(canvasId) as HTMLCanvasElement
+            (c1.getContext("2d") as CanvasRenderingContext2D).apply {
+                val x = Random.nextDouble() * props.width
+                val y = Random.nextDouble() * props.height
+                lineWidth = 1.0
+                strokeStyle = "#00ffAA"
+                lineTo(x, y)
+                stroke()
+            }
+        }, 1000)
     }
 
     h.div {
-        h.small { +"Nav and permalink to here." }
+        h.small { +"Timer..." }
     }
     h.div {
         h.canvas {
