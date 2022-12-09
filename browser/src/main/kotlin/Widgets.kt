@@ -1,11 +1,28 @@
 import csstype.ClassName
+import emotion.react.css
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML
-import util.css
+import util.HashRoute
+import react.dom.html.ReactHTML as h
 
 val Loading = FC<Props> {
-    ReactHTML.h1 { +"Loading..." }
+    h.h1 { +"Loading..." }
+}
+
+external interface NavItemProps : Props {
+    var name: String
+    var to: HashRoute
+}
+
+val NavItem = FC<NavItemProps> { props ->
+    h.li {
+        css(ClassName("nav-item")) {}
+        h.a {
+            css(ClassName("nav-link")) {}
+            +props.name
+            href = props.to.href
+        }
+    }
 }
 
 external interface ErrorPageProps : Props {
@@ -13,8 +30,8 @@ external interface ErrorPageProps : Props {
 }
 
 val ErrorPage = FC<ErrorPageProps> { props ->
-    ReactHTML.div {
-        css(ClassName("alert alert-warning"))
+    h.div {
+        css(ClassName("alert alert-warning")){}
         +props.message
     }
 }
