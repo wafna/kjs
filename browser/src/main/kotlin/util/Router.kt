@@ -65,6 +65,9 @@ data class HashRoute(val path: String, val params: Map<String, String> = mapOf()
     }
 }
 
+/**
+ * Encapsulates mappings between hash routes and components.
+ */
 interface Route {
     /**
      * Uniquely indicates a route.
@@ -91,7 +94,7 @@ interface Route {
 fun ChildrenBuilder.doRoute(routes: Collection<Route>, hash: HashRoute?, defaultComponent: FC<Props>) {
     routes.map { it.routeId }.let {
         require(it.toSet().size == routes.size) {
-            throw RuntimeException("Non-unique route ids detected in: ${it.joinToString(", ")}")
+            "Non-unique route ids detected in: ${it.joinToString(", ")}"
         }
     }
     if (null == hash) {

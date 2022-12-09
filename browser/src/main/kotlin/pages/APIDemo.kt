@@ -9,32 +9,34 @@ import emotion.react.css
 import kotlinx.coroutines.launch
 import mainScope
 import react.*
+import react.dom.events.MouseEvent
+import util.PropsSplat
 import util.classNames
 import util.preventDefault
 import util.withTargetValue
 import react.dom.html.ReactHTML as h
 
-external interface RecordEditorProps : Props {
+private external interface RecordEditorProps : Props {
     var record: Record?
     var updateRecord: (Record) -> Unit
     var createRecord: (RecordWIP) -> Unit
 }
 
-val RecordEditor = FC<RecordEditorProps> { props ->
+private val RecordEditor = FC<RecordEditorProps> { props ->
 
     val record = props.record
     var data by useState(record?.data ?: "")
 
     h.form {
         h.div {
-            css(ClassName("form-group")){}
+            css(ClassName("form-group")) {}
             val ctrlId = "the-data"
             h.label {
                 +"Data"
                 htmlFor = ctrlId
             }
             h.input {
-                css(ClassName("form-control")){}
+                css(ClassName("form-control")) {}
                 id = ctrlId
                 placeholder = "..."
                 value = data
@@ -44,7 +46,7 @@ val RecordEditor = FC<RecordEditorProps> { props ->
         h.div {
             if (null == record) {
                 h.button {
-                    css(ClassName("btn btn-primary")){}
+                    css(ClassName("btn btn-primary")) {}
                     +"Create"
                     onClick = preventDefault {
                         props.createRecord(RecordWIP(data))
@@ -52,13 +54,30 @@ val RecordEditor = FC<RecordEditorProps> { props ->
                 }
             } else {
                 h.button {
-                    css(classNames("btn", "btn-primary")){}
+                    css(classNames("btn", "btn-primary")) {}
                     +"Update"
                     onClick = preventDefault {
                         props.updateRecord(Record(record.id, data))
                     }
                 }
             }
+        }
+    }
+}
+
+private external interface ItemCtrlProps : PropsSplat {
+    var onClick: (MouseEvent<*, *>) -> Unit
+}
+
+private fun col(n: Int) = "col-lg-$n"
+
+private val ItemCtrl = FC<ItemCtrlProps> { props ->
+    h.div {
+        css(ClassName(col(1))) {}
+        h.span {
+            css(ClassName("clickable")) {}
+            children = props.children
+            onClick = preventDefault { props.onClick(it) }
         }
     }
 }
@@ -83,68 +102,59 @@ val RecordList = FC<Props> {
         null -> Loading
         else -> h.div {
             h.div {
-                css(ClassName("container")){}
-                fun col(n: Int) = "col-lg-$n"
+                css(ClassName("container")) {}
                 h.div {
-                    css(ClassName("row")){}
+                    css(ClassName("row")) {}
                     h.div {
-                        css(ClassName(col(1))){}
+                        css(ClassName(col(1))) {}
                         h.small { +"delete" }
                     }
                     h.div {
-                        css(ClassName(col(1))){}
+                        css(ClassName(col(1))) {}
                         h.small { +"modify" }
                     }
                     h.div {
-                        css(ClassName(col(5))){}
+                        css(ClassName(col(5))) {}
                         h.strong { +"Id" }
                     }
                     h.div {
-                        css(ClassName(col(5))){}
+                        css(ClassName(col(5))) {}
                         h.strong { +"Data" }
                     }
                 }
                 records!!.forEach { record ->
                     val id = record.id
                     h.div {
-                        css(ClassName("row")){}
-                        h.div {
-                            css(ClassName(col(1))){}
-                            key = id
-                            h.span {
-                                css(ClassName("clickable")){}
-                                +"∄"
-                                onClick = preventDefault {
-                                    mainScope.launch {
-                                        API.deleteRecord(id)
-                                        updateList()
-                                    }
+                        key = id
+                        css(ClassName("row")) {}
+                        ItemCtrl {
+                            +"∄"
+                            onClick = preventDefault {
+                                mainScope.launch {
+                                    API.deleteRecord(id)
+                                    updateList()
                                 }
                             }
                         }
-                        h.div {
-                            css(ClassName(col(1))){}
-                            h.span {
-                                css(ClassName("clickable")){}
-                                +"∆"
-                                onClick = preventDefault {
-                                    editedRecord = record
-                                }
+                        ItemCtrl {
+                            +"∆"
+                            onClick = preventDefault {
+                                editedRecord = record
                             }
                         }
                         h.div {
-                            css(ClassName(col(5))){}
-                            h.span { +record.id }
+                            css(ClassName(col(5))) {}
+                            h.pre { +record.id }
                         }
                         h.div {
-                            css(ClassName(col(5))){}
+                            css(ClassName(col(5))) {}
                             h.span { +record.data }
                         }
                     }
                 }
             }
             h.button {
-                css(ClassName("btn btn-primary")){}
+                css(ClassName("btn btn-primary")) {}
                 h.em { +"+" }
                 onClick = preventDefault {
                     createNew = true
