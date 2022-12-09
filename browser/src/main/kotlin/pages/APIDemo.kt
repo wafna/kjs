@@ -1,5 +1,12 @@
+package pages
+
+import API
+import Loading
+import Record
+import RecordWIP
 import csstype.ClassName
 import kotlinx.coroutines.launch
+import mainScope
 import react.*
 import util.classNames
 import react.dom.html.ReactHTML as h

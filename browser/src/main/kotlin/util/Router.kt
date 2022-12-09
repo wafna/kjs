@@ -14,7 +14,9 @@ data class HashURL(val path: String, val params: Map<String, String> = mapOf()) 
         append(path)
         if (params.isNotEmpty()) {
             append("?")
+            var sep = false
             for (param in params) {
+                if (sep) append("&") else sep = true
                 append(param.key)
                 append("=")
                 append(param.value)
@@ -23,7 +25,7 @@ data class HashURL(val path: String, val params: Map<String, String> = mapOf()) 
     }
 }
 
-external interface LinkProps : PropsWithChildren, PropsWithStyle {
+external interface LinkProps : PropsWithChildren, PropsWithStyle, PropsWithClassName {
     var to: HashURL
     var target: AnchorTarget?
 }
@@ -58,7 +60,7 @@ object Router {
                 qSplit[1].let { queryString ->
                     queryString.split("&").fold(mapOf()) { params, param ->
                         param.split("=").let { pair ->
-                            check(2 == pair.size) { "Malformed query parameter $pair" }
+                            check(2 == pair.size) { "Malformed query parameter $pair in $raw" }
                             val name = pair[0]
                             val value = pair[1]
                             check(!params.containsKey(name)) { "Duplicate param name $name" }
@@ -73,11 +75,17 @@ object Router {
 
     interface Route {
         val path: String
+
         /**
          * Each page must produce a component.  However, these components may require configuration (props).
          * Here, we get the params from the hash for use in component configuration.
          */
         fun component(params: Map<String, String> = mapOf()): FC<Props>
+
+        /**
+         * Returns the hash with no params.  Most routes will work this way.
+         */
+        fun defaultHash(): HashURL = HashURL(path)
     }
 
     fun ChildrenBuilder.doRoute(routes: Collection<Route>, hash: HashURL?, defaultPage: FC<Props>) {

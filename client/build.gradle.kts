@@ -34,19 +34,5 @@ tasks.withType<KotlinCompile> {
 }
 
 application {
-    mainClass.set("wafna.kjs.server.ServerKt")
-}
-
-distributions {
-    main {
-        distributionBaseName.set("kjs")
-        contents {
-            from(file("configs")) {
-                into("configs")
-            }
-            from(rootProject.file("browser/build")) {
-                into("browser")
-            }
-        }
-    }
+    mainClass.set("wafna.kjs.client.ClientKt")
 }

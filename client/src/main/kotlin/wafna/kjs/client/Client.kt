@@ -1,4 +1,4 @@
-package wafna.kjs.server
+package wafna.kjs.client
 
 import io.ktor.client.*
 import io.ktor.client.call.*

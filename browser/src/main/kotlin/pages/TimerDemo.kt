@@ -1,3 +1,5 @@
+package pages
+
 import csstype.Border
 import csstype.Color
 import csstype.LineStyle
