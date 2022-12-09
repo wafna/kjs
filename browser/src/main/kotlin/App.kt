@@ -6,15 +6,10 @@ import react.Props
 import react.dom.html.ReactHTML as h
 import react.useEffectOnce
 import react.useState
-
-/**
- * Get the current hash component of the window's address, stripping the superfluous leading '#'.
- */
-private fun currentHash() = window.location.hash.let { hash ->
-    if (hash.startsWith("#")) {
-        hash.substring(1)
-    } else hash
-}
+import util.HashURL
+import util.Router.currentHash
+import util.classNames
+import util.css
 
 external interface NavItemProps : Props {
     var name: String
@@ -33,9 +28,25 @@ val NavItem = FC<NavItemProps> { props ->
     }
 }
 
+enum class Page(val path: String) {
+    APIDemoPage("api-demo") {
+        override fun component(params: Map<String, String>): FC<Props> = RecordList
+    },
+    TimerDemoPage("timer-demo") {
+        override fun component(params: Map<String, String>): FC<Props> = FC {
+            TimerDemo {
+                height = 400.0
+                width = 400.0
+            }
+        }
+    };
+
+    abstract fun component(params: Map<String, String> = mapOf()): FC<Props>
+}
+
 val App = FC<Props> {
 
-    var hash: String by useState("")
+    var hash: HashURL? by useState(null)
 
     fun updateHash() = mainScope.launch {
         hash = currentHash()
@@ -48,7 +59,6 @@ val App = FC<Props> {
 
     h.div {
         css(ClassName("container"))
-
         h.h1 {
             +"Kotlin Client Server (React)"
         }
@@ -69,14 +79,22 @@ val App = FC<Props> {
                     }
                 }
             }
-            when (hash) {
-                "timer" -> Canvas {
-                    width = 300.0
-                    height = 300.0
+            try {
+                if (null == hash) {
+                    ErrorPage {
+                        message = "Invalid path: null"
+                    }
+                } else {
+                    when (val page = Page.values().find { it.path == hash!!.path }) {
+                        null ->
+                            RecordList {}
+                        else ->
+                            (page.component(hash!!.params)) {}
+                    }
                 }
-
-                "rest" -> RecordList {}
-                else -> RecordList {}
+            } catch (e: Throwable) {
+                console.error(e)
+                ErrorPage { message = e.message ?: e::class.toString() }
             }
         }
     }

@@ -2,6 +2,8 @@ import csstype.ClassName
 import kotlinx.coroutines.launch
 import react.*
 import react.dom.html.ReactHTML as h
+import util.preventDefault
+import util.withTargetValue
 
 external interface RecordEditorProps : Props {
     var record: Record?
@@ -27,7 +29,7 @@ val RecordEditor = FC<RecordEditorProps> { props ->
                 id = ctrlId
                 placeholder = "..."
                 value = data
-                onChange = { data = it.target.value }
+                onChange = withTargetValue { data = it }
             }
         }
         h.div {

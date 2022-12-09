@@ -11,16 +11,15 @@ import org.w3c.dom.HTMLCanvasElement
 import react.FC
 import react.Props
 import react.useEffect
-import kotlin.math.PI
 import kotlin.random.Random
 import react.dom.html.ReactHTML as h
 
-external interface CanvasProps : Props {
+external interface TimerDemoProps : Props {
     var height: Double
     var width: Double
 }
 
-val Canvas = FC<CanvasProps> { props ->
+val TimerDemo = FC<TimerDemoProps> { props ->
 
     val canvasId = "myCanvas"
 
