@@ -1,9 +1,7 @@
 package util
 
 import kotlinx.browser.window
-import react.FC
-import react.PropsWithChildren
-import react.PropsWithStyle
+import react.*
 import react.dom.html.AnchorTarget
 import react.dom.html.ReactHTML as h
 
@@ -70,6 +68,34 @@ object Router {
                 }
             }
             HashURL(path, params)
+        }
+    }
+
+    interface Route {
+        val path: String
+        /**
+         * Each page must produce a component.  However, these components may require configuration (props).
+         * Here, we get the params from the hash for use in component configuration.
+         */
+        fun component(params: Map<String, String> = mapOf()): FC<Props>
+    }
+
+    fun ChildrenBuilder.doRoute(routes: Collection<Route>, hash: HashURL?, defaultPage: FC<Props>) {
+        if (null == hash) {
+            defaultPage {}
+        } else {
+            val hashPath = hash.path
+            if (hashPath.isEmpty()) {
+                defaultPage {}
+            } else {
+                when (val page = routes.find { it.path == hashPath }) {
+                    null ->
+                        throw RuntimeException("Unknown hash path: $hashPath")
+
+                    else ->
+                        (page.component(hash.params)) {}
+                }
+            }
         }
     }
 

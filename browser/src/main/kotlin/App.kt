@@ -7,7 +7,9 @@ import react.dom.html.ReactHTML as h
 import react.useEffectOnce
 import react.useState
 import util.HashURL
+import util.Router
 import util.Router.currentHash
+import util.Router.doRoute
 import util.classNames
 import util.css
 
@@ -28,20 +30,29 @@ val NavItem = FC<NavItemProps> { props ->
     }
 }
 
-enum class Page(val path: String) {
-    APIDemoPage("api-demo") {
+/**
+ * Defining the pages in an enum makes them easier to enumerate (IKR?!).
+ */
+enum class Page : Router.Route {
+    APIDemoPage() {
+        override val path: String = "api-demo"
         override fun component(params: Map<String, String>): FC<Props> = RecordList
     },
-    TimerDemoPage("timer-demo") {
+    TimerDemoPage() {
+        override val path: String = "timer-demo"
+
+        // If the page component requires configuration, just wrap it in a component that does not.
         override fun component(params: Map<String, String>): FC<Props> = FC {
             TimerDemo {
-                height = 400.0
-                width = 400.0
+                height = params["height"]?.toDoubleOrNull() ?: 400.0
+                width = params["width"]?.toDoubleOrNull() ?: 400.0
             }
         }
     };
 
-    abstract fun component(params: Map<String, String> = mapOf()): FC<Props>
+    companion object {
+        fun pages(): Collection<Router.Route> = Page.values().toList()
+    }
 }
 
 val App = FC<Props> {
@@ -68,30 +79,19 @@ val App = FC<Props> {
                 h.ul {
                     css(ClassName("navbar-nav mr-auto"))
                     NavItem {
-                        name = "REST"
-                        href = "rest"
+                        name = "API Demo"
+                        href = Page.APIDemoPage.path
                         active = false
                     }
                     NavItem {
-                        name = "Timer"
-                        href = "timer"
+                        name = "Timer Demo"
+                        href = Page.TimerDemoPage.path
                         active = true
                     }
                 }
             }
             try {
-                if (null == hash) {
-                    ErrorPage {
-                        message = "Invalid path: null"
-                    }
-                } else {
-                    when (val page = Page.values().find { it.path == hash!!.path }) {
-                        null ->
-                            RecordList {}
-                        else ->
-                            (page.component(hash!!.params)) {}
-                    }
-                }
+                doRoute(Page.pages(), hash, RecordList)
             } catch (e: Throwable) {
                 console.error(e)
                 ErrorPage { message = e.message ?: e::class.toString() }

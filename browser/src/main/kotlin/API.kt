@@ -73,4 +73,7 @@ object API {
 
     suspend fun createRecord(record: RecordWIP) =
         put("$apiRoot/record", record)
+
+    // Intended to fail
+    suspend fun nonesuch() = get("$apiRoot/nonesuch")
 }
