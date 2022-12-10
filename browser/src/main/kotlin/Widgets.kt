@@ -2,7 +2,9 @@ import csstype.ClassName
 import emotion.react.css
 import react.FC
 import react.Props
+import react.PropsWithChildren
 import util.HashRoute
+import util.PropsSplat
 import react.dom.html.ReactHTML as h
 
 val Loading = FC<Props> {
@@ -12,6 +14,56 @@ val Loading = FC<Props> {
 external interface NavItemProps : Props {
     var name: String
     var to: HashRoute
+}
+
+val Container = FC<PropsSplat> {props ->
+    h.div {
+        css(ClassName("container")) {}
+        className = props.className
+        style = props.style
+        children = props.children
+    }
+}
+
+val Row = FC<PropsSplat> {props ->
+    h.div {
+        css(ClassName("row")) {}
+        className = props.className
+        style = props.style
+        children = props.children
+    }
+}
+
+enum class ColumnScale(val scale: String) {
+    Small("sm"),
+    Medium("md"),
+    Large("lg");
+
+    override fun toString(): String = scale
+}
+
+external interface ColProps : PropsSplat {
+    var scale: ColumnScale
+    var size: Int
+}
+
+val Col = FC <ColProps> { props ->
+    h.div {
+        css(ClassName("col-${props.scale}-${props.size}")){}
+        className = props.className
+        style = props.style
+        children = props.children
+    }
+}
+
+val NavBar = FC<PropsWithChildren> {props ->
+    h.nav {
+        css(ClassName("navbar navbar-expand-lg navbar-light bg-light")) {}
+        h.ul {
+            css(ClassName("navbar-nav mr-auto")) {}
+            children = props.children
+        }
+    }
 }
 
 val NavItem = FC<NavItemProps> { props ->

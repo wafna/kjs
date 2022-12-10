@@ -1,5 +1,3 @@
-import csstype.ClassName
-import emotion.react.css
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import pages.RecordList
@@ -8,7 +6,9 @@ import react.FC
 import react.Props
 import react.useEffectOnce
 import react.useState
-import util.*
+import util.HashRoute
+import util.Route
+import util.doRoute
 import react.dom.html.ReactHTML as h
 
 // Routes...
@@ -52,16 +52,20 @@ val App = FC<Props> {
         updateRoute()
     }
 
-    h.div {
-        css(ClassName("container")) {}
-        h.h1 {
-            +"Kotlin Client Server (React)"
+    Container {
+        Row {
+            Col {
+                scale = ColumnScale.Large
+                size = 12
+                h.h1 { +"Kotlin Client Server (React)" }
+            }
         }
-        h.div {
-            h.nav {
-                css(ClassName("navbar navbar-expand-lg navbar-light bg-light")) {}
-                h.ul {
-                    css(ClassName("navbar-nav mr-auto")) {}
+
+        Row {
+            Col {
+                scale = ColumnScale.Large
+                size = 12
+                NavBar {
                     NavItem {
                         name = "API Demo"
                         to = APIDemoPage.defaultHash()
@@ -72,12 +76,9 @@ val App = FC<Props> {
                     }
                 }
             }
-            try {
-                doRoute(listOf(APIDemoPage, TimerDemoPage), route, RecordList)
-            } catch (e: Throwable) {
-                console.error(e)
-                ErrorPage { message = e.message ?: e::class.toString() }
-            }
+        }
+        doRoute(listOf(APIDemoPage, TimerDemoPage), route, RecordList) { hash ->
+            ErrorPage { message = "Bad route: ${hash.href}" }
         }
     }
 }

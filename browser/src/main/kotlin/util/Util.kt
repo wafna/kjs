@@ -12,7 +12,7 @@ import react.dom.events.MouseEvent
  * There is no JSX style way to push a component's properties down, en masse.
  * Instead, derive this for component props classes and push the properties, like so:
  * <code>
- *     css(props.className)
+ *     className = props.className
  *     style = props.style
  *     children = props.children
  * <code>
