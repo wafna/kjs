@@ -1,8 +1,9 @@
 package util
 
 import kotlinx.browser.window
-import react.*
-import react.dom.html.AnchorTarget
+import react.ChildrenBuilder
+import react.FC
+import react.Props
 
 /**
  * The router treats the hash fragment as an id followed by an optional query string.
@@ -26,6 +27,7 @@ data class HashRoute(val path: String, val params: Map<String, String> = mapOf()
         }
     }
 
+    @Suppress("unused")
     fun goto() {
         window.location.hash = href
     }
@@ -91,7 +93,12 @@ interface Route {
  * Emits the defaultComponent when the hash is empty or missing.
  * Throws an error if no match is found.
  */
-fun ChildrenBuilder.doRoute(routes: Collection<Route>, hash: HashRoute?, defaultComponent: FC<Props>) {
+fun ChildrenBuilder.doRoute(
+    routes: Collection<Route>,
+    hash: HashRoute?,
+    defaultComponent: FC<Props>,
+    badHash: ChildrenBuilder.(HashRoute) -> Unit = {}
+) {
     routes.map { it.routeId }.let {
         require(it.toSet().size == routes.size) {
             "Non-unique route ids detected in: ${it.joinToString(", ")}"
@@ -105,7 +112,7 @@ fun ChildrenBuilder.doRoute(routes: Collection<Route>, hash: HashRoute?, default
             defaultComponent {}
         } else {
             when (val page = routes.find { it.routeId == hashPath }) {
-                null -> throw RuntimeException("Unknown hash path: $hashPath")
+                null -> badHash(hash)
                 else -> (page.component(hash.params)) {}
             }
         }
