@@ -16,7 +16,7 @@ external interface NavItemProps : Props {
     var to: HashRoute
 }
 
-val Container = FC<PropsSplat> {props ->
+val Container = FC<PropsSplat> { props ->
     h.div {
         css(ClassName("container")) {}
         className = props.className
@@ -25,7 +25,7 @@ val Container = FC<PropsSplat> {props ->
     }
 }
 
-val Row = FC<PropsSplat> {props ->
+val Row = FC<PropsSplat> { props ->
     h.div {
         css(ClassName("row")) {}
         className = props.className
@@ -47,16 +47,16 @@ external interface ColProps : PropsSplat {
     var size: Int
 }
 
-val Col = FC <ColProps> { props ->
+val Col = FC<ColProps> { props ->
     h.div {
-        css(ClassName("col-${props.scale}-${props.size}")){}
+        css(ClassName("col-${props.scale}-${props.size}")) {}
         className = props.className
         style = props.style
         children = props.children
     }
 }
 
-val NavBar = FC<PropsWithChildren> {props ->
+val NavBar = FC<PropsWithChildren> { props ->
     h.nav {
         css(ClassName("navbar navbar-expand-lg navbar-light bg-light")) {}
         h.ul {
@@ -83,7 +83,7 @@ external interface ErrorPageProps : Props {
 
 val ErrorPage = FC<ErrorPageProps> { props ->
     h.div {
-        css(ClassName("alert alert-warning")){}
+        css(ClassName("alert alert-warning")) {}
         +props.message
     }
 }
