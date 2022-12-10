@@ -1,26 +1,10 @@
 import kotlinx.browser.window
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.await
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.w3c.fetch.RequestInit
 import org.w3c.fetch.Response
-import kotlin.js.Promise
 import kotlin.js.json
-
-// Used throughout to wrap api calls and effects.
-val mainScope = MainScope()
-
-private suspend fun Promise<Response>.assertStatus() = await().apply {
-    status.toInt().also {
-        check(200 == it || 0 == it) {
-            "Operation failed: $status  $url".also { msg ->
-                console.log(msg)
-                window.alert(msg)
-            }
-        }
-    }
-}
 
 private suspend fun fetch(method: String, url: String, body: dynamic = null): Response =
     window.fetch(
@@ -33,7 +17,16 @@ private suspend fun fetch(method: String, url: String, body: dynamic = null): Re
                 "pragma" to "no-cache"
             )
         )
-    ).assertStatus()
+    ).await().apply {
+        status.toInt().also {
+            check(200 == it || 0 == it) {
+                "Operation failed: $status $url".also { msg ->
+                    console.log(msg)
+                    window.alert(msg)
+                }
+            }
+        }
+    }
 
 // Verbiage: expressing the semantics of each method.
 

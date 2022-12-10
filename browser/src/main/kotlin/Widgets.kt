@@ -18,6 +18,7 @@ external interface NavItemProps : Props {
 
 val Container = FC<PropsSplat> { props ->
     h.div {
+        css(props.className) {}
         className = ClassName("container")
         style = props.style
         children = props.children
@@ -26,6 +27,7 @@ val Container = FC<PropsSplat> { props ->
 
 val Row = FC<PropsSplat> { props ->
     h.div {
+        css(props.className) {}
         className = ClassName("row")
         style = props.style
         children = props.children
@@ -47,6 +49,7 @@ external interface ColProps : PropsSplat {
 
 val Col = FC<ColProps> { props ->
     h.div {
+        css(props.className) {}
         className = ClassName("col-${props.scale}-${props.size}")
         style = props.style
         children = props.children
