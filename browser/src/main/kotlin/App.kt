@@ -77,8 +77,15 @@ val App = FC<Props> {
                 }
             }
         }
-        doRoute(listOf(APIDemoPage, TimerDemoPage), route, RecordList) { hash ->
-            ErrorPage { message = "Bad route: ${hash.href}" }
+        h.br {}
+        Row {
+            Col {
+                scale = ColumnScale.Large
+                size = 12
+                doRoute(listOf(APIDemoPage, TimerDemoPage), route, RecordList) { hash ->
+                    ErrorPage { message = "Bad route: ${hash.href}" }
+                }
+            }
         }
     }
 }

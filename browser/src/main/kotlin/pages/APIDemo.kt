@@ -1,9 +1,12 @@
 package pages
 
 import API
+import Col
+import Container
 import Loading
 import Record
 import RecordWIP
+import Row
 import csstype.ClassName
 import emotion.react.css
 import kotlinx.coroutines.launch
@@ -101,25 +104,33 @@ val RecordList = FC<Props> {
     when (records) {
         null -> Loading
         else -> h.div {
-            h.div {
-                css(ClassName("container")) {}
-                h.div {
-                    css(ClassName("row")) {}
-                    h.div {
-                        css(ClassName(col(1))) {}
+            Container {
+                Row {
+                    Col {
+                        scale = ColumnScale.Large
+                        size = 1
                         h.small { +"delete" }
                     }
-                    h.div {
-                        css(ClassName(col(1))) {}
+                    Col {
+                        scale = ColumnScale.Large
+                        size = 1
                         h.small { +"modify" }
                     }
-                    h.div {
-                        css(ClassName(col(5))) {}
+                    Col {
+                        scale = ColumnScale.Large
+                        size = 5
                         h.strong { +"Id" }
                     }
-                    h.div {
-                        css(ClassName(col(5))) {}
+                    Col {
+                        scale = ColumnScale.Large
+                        size = 5
                         h.strong { +"Data" }
+                    }
+                }
+                if (records!!.isEmpty()) {
+                    h.div {
+                        css(ClassName("alert alert-info")) {}
+                        +"No records."
                     }
                 }
                 records!!.forEach { record ->
@@ -152,38 +163,46 @@ val RecordList = FC<Props> {
                         }
                     }
                 }
-            }
-            h.button {
-                css(ClassName("btn btn-primary")) {}
-                h.em { +"+" }
-                onClick = preventDefault {
-                    createNew = true
+                h.div {
+                    css(ClassName("row")) {}
+                    h.div {
+                        css(ClassName(col(1))) {}
+                        h.button {
+                            css(ClassName("btn btn-primary")) {}
+                            h.em { +"+" }
+                            onClick = preventDefault {
+                                createNew = true
+                            }
+                        }
+                    }
+                }
+                Row {
+                    if (null != editedRecord) {
+                        RecordEditor {
+                            record = editedRecord
+                            updateRecord = { record ->
+                                mainScope.launch {
+                                    API.updateRecord(record)
+                                    updateList()
+                                    editedRecord = null
+                                }
+                            }
+                        }
+                    } else if (createNew) {
+                        RecordEditor {
+                            record = null
+                            createRecord = { record ->
+                                mainScope.launch {
+                                    API.createRecord(record)
+                                    updateList()
+                                    createNew = false
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            if (null != editedRecord) {
-                RecordEditor {
-                    record = editedRecord
-                    updateRecord = { record ->
-                        mainScope.launch {
-                            API.updateRecord(record)
-                            updateList()
-                            editedRecord = null
-                        }
-                    }
-                }
-            } else if (createNew) {
-                RecordEditor {
-                    record = null
-                    createRecord = { record ->
-                        mainScope.launch {
-                            API.createRecord(record)
-                            updateList()
-                            createNew = false
-                        }
-                    }
-                }
-            }
         }
     }
 }
