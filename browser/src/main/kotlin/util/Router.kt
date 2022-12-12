@@ -5,24 +5,50 @@ import react.ChildrenBuilder
 import react.FC
 import react.Props
 
+typealias Params = Map<String, String>
+
+fun Params.getString(param: String): String? = get(param)
+fun Params.getInt(param: String): Int? = get(param)?.toIntOrNull()
+fun Params.getDouble(param: String): Double? = get(param)?.toDoubleOrNull()
+
+class ParamBuilder internal constructor() {
+    private val params = mutableMapOf<String, String>()
+    internal fun toMap(): Params = params.toMap()
+    fun addParam(name: String, value: Any?) {
+        if (params.containsKey(name))
+            throw Exception("Duplicate parameter $name")
+        params[name] = value?.toString() ?: ""
+    }
+
+    operator fun Pair<String, Any>.unaryPlus() {
+        addParam(this.first, this.second)
+    }
+}
+
+fun paramBuilder(block: ParamBuilder.() -> Unit): Params =
+    ParamBuilder().also { it.block() }.toMap()
+
+
 /**
  * The router treats the hash fragment as an id followed by an optional query string.
  */
-data class HashRoute(val path: String, val params: Map<String, String> = mapOf()) {
+data class HashRoute(val path: String, val params: Params = mapOf()) {
     /**
      * For anchors.
      */
-    val href = buildString {
-        append("#")
-        append(path)
-        if (params.isNotEmpty()) {
-            append("?")
-            var sep = false
-            for (param in params) {
-                if (sep) append("&") else sep = true
-                append(param.key)
-                append("=")
-                append(param.value)
+    val href by lazy {
+        buildString {
+            append("#")
+            append(path)
+            if (params.isNotEmpty()) {
+                append("?")
+                var sep = false
+                for (param in params) {
+                    if (sep) append("&") else sep = true
+                    append(param.key)
+                    append("=")
+                    append(param.value)
+                }
             }
         }
     }
@@ -33,6 +59,8 @@ data class HashRoute(val path: String, val params: Map<String, String> = mapOf()
     }
 
     companion object {
+        fun build(routeId: String, params: ParamBuilder.() -> Unit): HashRoute =
+            HashRoute(routeId, paramBuilder(params))
         /**
          * Retrieves the current hash parsed as a HashRoute.
          */
@@ -80,7 +108,7 @@ interface Route {
      * Each page must produce a component.  However, these components may require configuration (props).
      * Here, the params from the hash are available for component configuration.
      */
-    fun component(params: Map<String, String> = mapOf()): FC<Props>
+    fun component(params: Params = mapOf()): FC<Props>
 
     /**
      * Returns the hash with no params.  Most routes will work this way.

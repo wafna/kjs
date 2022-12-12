@@ -6,26 +6,24 @@ import react.FC
 import react.Props
 import react.useEffectOnce
 import react.useState
-import util.HashRoute
-import util.Route
-import util.doRoute
+import util.*
 import react.dom.html.ReactHTML as h
 
 // Routes...
 
 object APIDemoPage : Route {
     override val routeId: String = "api-demo"
-    override fun component(params: Map<String, String>): FC<Props> = RecordList
+    override fun component(params: Params): FC<Props> = RecordList
 }
 
 object TimerDemoPage : Route {
     override val routeId: String = "timer-demo"
 
     // If the page component requires configuration, just wrap it in a component that does not!
-    override fun component(params: Map<String, String>): FC<Props> = FC {
+    override fun component(params: Params): FC<Props> = FC {
         TimerDemo {
-            height = params["height"]?.toDoubleOrNull() ?: 400.0
-            width = params["width"]?.toDoubleOrNull() ?: 400.0
+            height = params.getInt("height") ?: 400
+            width = params.getInt("width") ?: 400
         }
     }
 
@@ -33,8 +31,13 @@ object TimerDemoPage : Route {
      * A custom URL generator for this route.
      */
     fun makeHash(height: Double, width: Double): HashRoute =
-        HashRoute(routeId, mapOf("height" to height.toString(), "width" to width.toString()))
+        HashRoute.build(routeId) {
+            +("height" to height)
+            +("width" to width)
+        }
 }
+
+// Main component.
 
 /**
  * Containing the chrome and the routing.
