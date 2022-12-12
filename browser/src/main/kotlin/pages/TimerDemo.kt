@@ -46,7 +46,7 @@ val TimerDemo = FC<TimerDemoProps> { props ->
     fun deleteTimer() {
         if (null != timer) {
             clearTimeout(timer!!)
-            timer = null 
+            timer = null
         }
     }
 
