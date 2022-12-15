@@ -63,21 +63,17 @@ external interface GridleySearchProps : Props {
 
 val GridleySearch = FC<GridleySearchProps> { props ->
     var filter by useState("")
-    Col {
-        scale = ColumnScale.Large
-        size = 3
-        ReactHTML.input {
-            className = ClassName("form-control")
-            type = InputType.search
-            placeholder = "Search..."
-            ariaLabel = "Search"
-            value = filter
-            onChange = withTargetValue {
-                filter = it
-                props.onFilter(it)
-            }
-            autoFocus = true
+    ReactHTML.input {
+        className = ClassName("form-control")
+        type = InputType.search
+        placeholder = "Search..."
+        ariaLabel = "Search"
+        value = filter
+        onChange = withTargetValue {
+            filter = it
+            props.onFilter(it)
         }
+        autoFocus = true
     }
 }
 

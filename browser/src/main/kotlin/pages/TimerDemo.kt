@@ -15,12 +15,22 @@ import react.FC
 import react.Props
 import react.rawUseEffect
 import react.useEffect
+import kotlin.math.floor
 import kotlin.random.Random
 import react.dom.html.ReactHTML as h
 
 external interface TimerDemoProps : Props {
     var height: Int
     var width: Int
+}
+
+private val hexDigits = ('0' .. '9').toList() + ('A' .. 'F').toList()
+
+private fun randomColor(): String = buildString {
+    append('#')
+    repeat(6) {
+        append(hexDigits[floor(Random.nextDouble() * 16).toInt()])
+    }
 }
 
 val TimerDemo = FC<TimerDemoProps> { props ->
@@ -36,7 +46,7 @@ val TimerDemo = FC<TimerDemoProps> { props ->
                 val x = Random.nextDouble() * props.width
                 val y = Random.nextDouble() * props.height
                 lineWidth = 1.0
-                strokeStyle = "#00ffAA"
+                strokeStyle = randomColor()
                 lineTo(x, y)
                 stroke()
             }

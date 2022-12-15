@@ -1,6 +1,8 @@
 package pages
 
 import csstype.ClassName
+import csstype.Color
+import emotion.react.css
 import react.*
 import util.*
 import kotlin.math.ceil
@@ -106,7 +108,7 @@ fun randomString(chars: List<Char>, length: Int): String {
 val GridleyDemo = FC<Props> {
     val totalRecords = 1800
     val chars = ('A'..'Z').toList()
-    val digits = ('0' .. '9').toList()
+    val digits = ('0'..'9').toList()
     val allRecords = (0 until totalRecords).map { i ->
         listOf(
             listOf(i.toString()),
@@ -138,7 +140,7 @@ val Gridley = FC<GridleyProps> { props ->
     var _sortKey: SortKey? by useState(null)
 
     // First, filter, then sort.
-    val processedRecords: List<List<List<String>>> =
+    val processedRecords =
         if (_filter.isEmpty()) props.records else {
             props.records.filter { record -> record.any { lines -> lines.any { it.contains(_filter) } } }
         }.let { filtered ->
@@ -152,7 +154,9 @@ val Gridley = FC<GridleyProps> { props ->
                             filtered.sortedByDescending { sortingFunction(it) }
                     }
                 when (val sortIndex = _sortKey!!.index) {
+                    // Numerical sort on id.
                     0 -> directionalSort { it[sortIndex][0].toInt() }
+                    // Textual sort on everything else.
                     else -> directionalSort { it[sortIndex].joinToString("") }
                 }
             }
@@ -171,21 +175,18 @@ val Gridley = FC<GridleyProps> { props ->
     Row {
         Col {
             scale = ColumnScale.Large
-            size = 12
-            GridleySearch {
-                onFilter = { _filter = it }
-            }
-        }
-    }
-    h.br {}
-    Row {
-        Col {
-            scale = ColumnScale.Large
-            size = 12
+            size = 6
             GridleyPager {
                 totalPages = _totalPages
                 currentPage = effectivePage
                 onPageSelect = { _currentPage = it }
+            }
+        }
+        Col {
+            scale = ColumnScale.Large
+            size = 6
+            GridleySearch {
+                onFilter = { _filter = it }
             }
         }
     }
@@ -227,8 +228,20 @@ val Gridley = FC<GridleyProps> { props ->
                                     1 -> h.pre { +line }
                                     2 -> h.pre { +line }
                                     3 -> when (line) {
-                                        "true" -> +"✓"
-                                        "false" -> +"X"
+                                        "true" ->
+                                            h.span {
+                                                css {
+                                                    color = Color("#008000")
+                                                }
+                                                +"✓"
+                                            }
+                                        "false" ->
+                                            h.span {
+                                                css {
+                                                    color = Color("#800000")
+                                                }
+                                                +"X"
+                                            }
                                         else -> +"?"
                                     }
                                     else -> +line
