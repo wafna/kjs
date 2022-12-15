@@ -1,7 +1,6 @@
 package util
 
 import csstype.ClassName
-import pages.SortDir
 import react.FC
 import react.Props
 import react.PropsWithClassName
@@ -64,33 +63,20 @@ external interface GridleySearchProps : Props {
 
 val GridleySearch = FC<GridleySearchProps> { props ->
     var filter by useState("")
-    ReactHTML.div {
-        className = ClassName("form")
-        ReactHTML.div {
-            className = ClassName("form-group")
-            Col {
-                scale = ColumnScale.Large
-                size = 1
-                ReactHTML.button {
-                    className = ClassName("btn btn-outline-primary form-control")
-                    //type = ButtonType.submit
-                    onClick = preventDefault { props.onFilter(filter) }
-                    +"Search"
-                }
+    Col {
+        scale = ColumnScale.Large
+        size = 3
+        ReactHTML.input {
+            className = ClassName("form-control")
+            type = InputType.search
+            placeholder = "Search..."
+            ariaLabel = "Search"
+            value = filter
+            onChange = withTargetValue {
+                filter = it
+                props.onFilter(it)
             }
-            Col {
-                scale = ColumnScale.Large
-                size = 3
-                ReactHTML.input {
-                    className = ClassName("form-control")
-                    type = InputType.search
-                    placeholder = "Search..."
-                    ariaLabel = "Search"
-                    value = filter
-                    onChange = withTargetValue { filter = it }
-                    autoFocus = true
-                }
-            }
+            autoFocus = true
         }
     }
 }
