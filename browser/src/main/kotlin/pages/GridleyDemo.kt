@@ -4,34 +4,15 @@ import csstype.ClassName
 import react.*
 import util.*
 import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 import react.dom.html.ReactHTML as h
 
-val columnHeaders = listOf<FC<Props>>(
-    FC {
-        h.div {
-            className = ClassName("floater")
-            +"Id"
-        }
-    },
-    FC {
-        h.div {
-            className = ClassName("floater")
-            +"Name"
-        }
-    },
-    FC {
-        h.div {
-            className = ClassName("floater")
-            +"Random"; h.br {}; +"Number"
-        }
-    })
+data class SortKey(val index: Int, val sortDir: SortDir)
 
-external interface SortIconProps : PropsWithChildren, PropsWithClassName {
-    var action: () -> Unit
-}
+external interface SortIconProps : PropsWithChildren, PropsWithClassName
 
 /**
  * A clickable control for a single sort direction.
@@ -48,63 +29,130 @@ val DownOn = FC<SortIconProps> { SortIcon { className = ClassName("float-down sp
 val UpOff = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"△" } }
 val UpOn = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▲" } }
 
+enum class SortDir {
+    Ascending, Descending
+}
+
 external interface SortControlProps : Props {
-    var sort: Boolean?
-    var action: (Boolean) -> Unit
+    var sortDir: SortDir?
+    var action: (SortDir) -> Unit
 }
 
 /**
  * A clickable control for two way sort direction.
  */
 val SortControl = FC<SortControlProps> { props ->
-    val sort = props.sort
+    val sort = props.sortDir
     h.div {
         className = ClassName("float-left ")
         h.div {
-            onClick = preventDefault {
-                console.log("SORT CONTROL")
-                props.action(true) }
-            if (null == sort || !sort)
-                UpOff {}
-            else
+            onClick = preventDefault { props.action(SortDir.Ascending) }
+            if (sort == SortDir.Ascending)
                 UpOn {}
+            else
+                UpOff {}
         }
         h.div {
-            onClick = preventDefault { props.action(false) }
-            if (null == sort || sort)
-                DownOff {}
-            else
+            onClick = preventDefault { props.action(SortDir.Descending) }
+            if (sort == SortDir.Descending)
                 DownOn {}
+            else
+                DownOff {}
         }
     }
 }
 
 /**
+ * The style and method of displaying the column headers.
+ * Sort controls are added at render, below, when we know the sort key state.
+ */
+val columnHeaders = listOf<FC<Props>>(
+    FC {
+        h.div {
+            className = ClassName("floater")
+            +"Id"
+        }
+    },
+    FC {
+        h.div {
+            className = ClassName("floater")
+            +"Name"
+        }
+    },
+    FC {
+        h.div {
+            className = ClassName("floater")
+            +"This"; h.br {}; +"That"
+        }
+    })
+
+val GridleyDemo = FC<Props> {
+    val totalRecords = 100
+    val chars = ('A'..'Z').toList()
+    val allRecords = (0 until totalRecords).map { i ->
+        val name = buildString {
+            repeat(32) {
+                append(
+                    chars[floor(Random.nextDouble() * chars.size).toInt()]
+                )
+            }
+        }
+        listOf(
+            listOf(i.toString()),
+            listOf(name),
+            listOf(Random.nextBoolean().toString(), Random.nextBoolean().toString())
+        )
+    }
+
+    Gridley {
+        records = allRecords
+        pageSize = 15
+    }
+}
+
+external interface GridleyProps : Props {
+    var records: List<List<List<String>>>
+    var pageSize: Int
+}
+
+/**
  * The normal functions of a data grid (display, pagination, filtering, and sorting) are decomposed.
- * We get flexibility and separation of concerns, but must hook a lot of stuff up.
+ * We get flexibility and separation of concerns, but must do a lot for ourselves..
  */
 @Suppress("LocalVariableName")
-val GridleyDemo = FC<Props> {
-    val _totalRecords = 100
-    val _pageSize = 15
-
+val Gridley = FC<GridleyProps> { props ->
     var _currentPage by useState(0)
     var _filter by useState("")
+    var _sortKey: SortKey? by useState(null)
 
-    val allRecords = (0 until _totalRecords).map { i ->
-        listOf(listOf(i.toString()), listOf("Thing", "$i"), listOf(Random.nextInt().toString()))
-    }
-    val filtered = if (_filter.isEmpty()) allRecords else {
-        allRecords.filter { record -> record.any { lines -> lines.any { it.contains(_filter) } } }
-    }
-    val _totalPages = ceil(filtered.size.toDouble() / _pageSize).toInt()
+    // First, filter, then sort.
+    val processedRecords: List<List<List<String>>> =
+        if (_filter.isEmpty()) props.records else {
+            props.records.filter { record -> record.any { lines -> lines.any { it.contains(_filter) } } }
+        }.let { filtered ->
+            // Here, we're free to represent the fields in the record in any way we want for the purposes of sorting.
+            if (null == _sortKey) filtered else {
+                fun <S : Comparable<S>> directionalSort(sortingFunction: (List<List<String>>) -> S) =
+                    when (_sortKey!!.sortDir) {
+                        SortDir.Ascending ->
+                            filtered.sortedBy { sortingFunction(it) }
+                        SortDir.Descending ->
+                            filtered.sortedByDescending { sortingFunction(it) }
+                    }
+                when (val sortIndex = _sortKey!!.index) {
+                    0 -> directionalSort { it[sortIndex][0].toInt() }
+                    else -> directionalSort { it[sortIndex].joinToString("") }
+                }
+            }
+        }
+    val _totalPages = ceil(processedRecords.size.toDouble() / props.pageSize).toInt()
 
     // Ensure we're on an actual page.
     val effectivePage = if (_currentPage >= _totalPages) _totalPages - 1 else _currentPage
 
-    val pageBounds = filtered.size.let { totalRecords ->
-        val low = max(0, effectivePage * _pageSize)
-        val high = min((1 + effectivePage) * _pageSize, totalRecords)
+    val pageBounds = processedRecords.size.let { totalRecords ->
+        val low = max(0, effectivePage * props.pageSize)
+        val high = min((1 + effectivePage) * props.pageSize, totalRecords)
         low until high
     }
 
@@ -136,10 +184,15 @@ val GridleyDemo = FC<Props> {
             size = 12
             GridleyTable {
                 className = ClassName("table table-sm")
-                fields = columnHeaders.map { hdr ->
+                fields = columnHeaders.withIndex().map { p ->
+                    val index = p.index
                     FC {
                         SortControl {
-                            action = { dir -> console.log("ACTION!", dir) }
+                            sortDir = _sortKey?.let { if (index == it.index) it.sortDir else null }
+                            action = { dir ->
+                                console.log("ACTION!", dir)
+                                _sortKey = SortKey(index, dir)
+                            }
                         }
                         h.div {
                             className = ClassName("float-left")
@@ -147,11 +200,11 @@ val GridleyDemo = FC<Props> {
                         }
                         h.div {
                             className = ClassName("float-left header")
-                            hdr {}
+                            p.value {}
                         }
                     }
                 }
-                records = filtered.slice(pageBounds).map { record ->
+                records = processedRecords.slice(pageBounds).map { record ->
                     record.map { lines ->
                         FC {
                             var sep = false
@@ -162,8 +215,8 @@ val GridleyDemo = FC<Props> {
                         }
                     }
                 }
-
             }
         }
     }
 }
+

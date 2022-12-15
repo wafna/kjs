@@ -1,6 +1,7 @@
 package util
 
 import csstype.ClassName
+import pages.SortDir
 import react.FC
 import react.Props
 import react.PropsWithClassName
@@ -15,12 +16,9 @@ import react.useState
 
 typealias DisplayLine = List<FC<Props>>
 
-data class SortKey(val index: Int, val ascending: Boolean)
-
 external interface GridleyTableProps : PropsWithClassName {
     var fields: DisplayLine
     var records: List<DisplayLine>
-    var sortKey: SortKey?
 }
 
 val GridleyTable = FC<GridleyTableProps> { props ->
