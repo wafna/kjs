@@ -1,5 +1,6 @@
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
+import pages.GridleyDemo
 import pages.RecordList
 import pages.TimerDemo
 import react.FC
@@ -36,6 +37,13 @@ object TimerDemoPage : Route {
             +("width" to width)
         }
 }
+
+object GridleyDemoPage : Route {
+    override val routeId: String = "gridley-demo"
+    override fun component(params: Params): FC<Props> = GridleyDemo
+}
+
+private val routes = listOf(APIDemoPage, TimerDemoPage, GridleyDemoPage)
 
 // Main component.
 
@@ -77,6 +85,10 @@ val App = FC<Props> {
                         name = "Timer Demo"
                         to = TimerDemoPage.makeHash(500.0, 500.0)
                     }
+                    NavItem {
+                        name = "Gridley Demo"
+                        to = GridleyDemoPage.defaultHash()
+                    }
                 }
             }
         }
@@ -85,7 +97,7 @@ val App = FC<Props> {
             Col {
                 scale = ColumnScale.Large
                 size = 12
-                doRoute(listOf(APIDemoPage, TimerDemoPage), route, RecordList) { hash ->
+                doRoute(routes, route, RecordList) { hash ->
                     ErrorPage { message = "Bad route: ${hash.href}" }
                 }
             }
