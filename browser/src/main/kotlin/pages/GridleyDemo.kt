@@ -69,37 +69,49 @@ val SortControl = FC<SortControlProps> { props ->
 val columnHeaders = listOf<FC<Props>>(
     FC {
         h.div {
-            className = ClassName("floater")
+            className = ClassName("float-right")
             +"Id"
         }
     },
     FC {
         h.div {
-            className = ClassName("floater")
+            className = ClassName("float-right")
             +"Name"
         }
     },
     FC {
         h.div {
-            className = ClassName("floater")
+            className = ClassName("float-right")
+            +"Number"
+        }
+    },
+    FC {
+        h.div {
+            className = ClassName("float-right")
             +"This"; h.br {}; +"That"
         }
     })
 
-val GridleyDemo = FC<Props> {
-    val totalRecords = 100
-    val chars = ('A'..'Z').toList()
-    val allRecords = (0 until totalRecords).map { i ->
-        val name = buildString {
-            repeat(32) {
-                append(
-                    chars[floor(Random.nextDouble() * chars.size).toInt()]
-                )
-            }
+fun randomString(chars: List<Char>, length: Int): String {
+    require(0 <= length)
+    return buildString {
+        repeat(32) {
+            append(
+                chars[floor(Random.nextDouble() * chars.size).toInt()]
+            )
         }
+    }
+}
+
+val GridleyDemo = FC<Props> {
+    val totalRecords = 1800
+    val chars = ('A'..'Z').toList()
+    val digits = ('0' .. '9').toList()
+    val allRecords = (0 until totalRecords).map { i ->
         listOf(
             listOf(i.toString()),
-            listOf(name),
+            listOf(randomString(chars, 32)),
+            listOf(randomString(digits, 32)),
             listOf(Random.nextBoolean().toString(), Random.nextBoolean().toString())
         )
     }
@@ -205,12 +217,22 @@ val Gridley = FC<GridleyProps> { props ->
                     }
                 }
                 records = processedRecords.slice(pageBounds).map { record ->
-                    record.map { lines ->
+                    record.withIndex().map { p ->
+                        val lines = p.value
                         FC {
                             var sep = false
                             for (line in lines) {
                                 if (sep) h.br {} else sep = true
-                                +line
+                                when (p.index) {
+                                    1 -> h.pre { +line }
+                                    2 -> h.pre { +line }
+                                    3 -> when (line) {
+                                        "true" -> +"✓"
+                                        "false" -> +"X"
+                                        else -> +"?"
+                                    }
+                                    else -> +line
+                                }
                             }
                         }
                     }
