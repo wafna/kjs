@@ -1,3 +1,5 @@
+package util
+
 import csstype.ClassName
 import emotion.react.css
 import react.FC
@@ -18,7 +20,7 @@ external interface NavItemProps : Props {
 
 val Container = FC<PropsSplat> { props ->
     h.div {
-        css(props.className) {}
+        className = props.className
         className = ClassName("container")
         style = props.style
         children = props.children
@@ -27,7 +29,7 @@ val Container = FC<PropsSplat> { props ->
 
 val Row = FC<PropsSplat> { props ->
     h.div {
-        css(props.className) {}
+        className = props.className
         className = ClassName("row")
         style = props.style
         children = props.children
@@ -49,7 +51,7 @@ external interface ColProps : PropsSplat {
 
 val Col = FC<ColProps> { props ->
     h.div {
-        css(props.className) {}
+        className = props.className
         className = ClassName("col-${props.scale}-${props.size}")
         style = props.style
         children = props.children
@@ -58,9 +60,9 @@ val Col = FC<ColProps> { props ->
 
 val NavBar = FC<PropsWithChildren> { props ->
     h.nav {
-        css(ClassName("navbar navbar-expand-lg navbar-light bg-light")) {}
+        className = ClassName("navbar navbar-expand-lg navbar-light bg-light")
         h.ul {
-            css(ClassName("navbar-nav mr-auto")) {}
+            className = ClassName("navbar-nav mr-auto")
             children = props.children
         }
     }
@@ -68,9 +70,9 @@ val NavBar = FC<PropsWithChildren> { props ->
 
 val NavItem = FC<NavItemProps> { props ->
     h.li {
-        css(ClassName("nav-item")) {}
+        className = ClassName("nav-item")
         h.a {
-            css(ClassName("nav-link")) {}
+            className = ClassName("nav-link")
             +props.name
             href = props.to.href
         }
@@ -83,8 +85,12 @@ external interface ErrorPageProps : Props {
 
 val ErrorPage = FC<ErrorPageProps> { props ->
     h.div {
-        css(ClassName("alert alert-warning")) {}
+        className = ClassName("alert alert-warning")
         +props.message
     }
+}
+
+object Entities {
+    val nbsp = FC<Props> { +"\u00A0" }
 }
 

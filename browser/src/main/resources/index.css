@@ -6,3 +6,27 @@ body {
 .clickable {
     cursor: pointer
 }
+
+.float-left {
+    float: left
+}
+
+.float-right {
+    float: right;
+}
+
+.float-bottom {
+    float: bottom;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    padding: 1px;
+    margin: 0;
+    align-content: center;
+}
+
+.header {
+    vertical-align: center;
+}

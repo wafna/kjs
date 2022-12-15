@@ -1,157 +1,87 @@
 package pages
 
-import Col
-import ColumnScale
-import Row
 import csstype.ClassName
-import react.FC
-import react.Props
-import react.PropsWithClassName
-import react.dom.aria.ariaLabel
-import react.dom.html.ButtonType
-import react.dom.html.InputType
-import react.useState
-import util.classNames
-import util.preventDefault
-import util.withTargetValue
+import react.*
+import util.*
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 import react.dom.html.ReactHTML as h
 
-// The nested list allows us to specify lines within table cells.
-typealias Record = List<List<String>>
-// ibid.
-typealias FieldName = List<String>
+val columnHeaders = listOf<FC<Props>>(
+    FC {
+        h.div {
+            className = ClassName("floater")
+            +"Id"
+        }
+    },
+    FC {
+        h.div {
+            className = ClassName("floater")
+            +"Name"
+        }
+    },
+    FC {
+        h.div {
+            className = ClassName("floater")
+            +"Random"; h.br {}; +"Number"
+        }
+    })
 
-private data class SortKey(val index: Int, val ascending: Boolean)
-
-private external interface GridleyProps : PropsWithClassName {
-    var fields: List<FieldName>
-    var records: List<Record>
-    var sortKey: SortKey?
+external interface SortIconProps : PropsWithChildren, PropsWithClassName {
+    var action: () -> Unit
 }
 
 /**
- * Data grid with pagination.
+ * A clickable control for a single sort direction.
  */
-private val Gridley = FC<GridleyProps> { props ->
-
-    val records = props.records
-
-    if (records.isEmpty()) {
-        h.div {
-            className = ClassName("alert alert-warning")
-            h.h3 { +"No records." }
-        }
-    } else {
-
-        h.table {
-            className = props.className
-            h.thead {
-                h.tr {
-                    for (field in props.fields) {
-                        h.th {
-                            var sep = false
-                            for (line in field) {
-                                if (sep) h.br {} else sep = true
-                                +line
-                            }
-                        }
-                    }
-                }
-            }
-            h.tbody {
-                for (record in records) {
-                    h.tr {
-                        for (field in record) {
-                            h.td {
-                                var sep = false
-                                for (line in field) {
-                                    if (sep) h.br {} else sep = true
-                                    +line
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+val SortIcon = FC<SortIconProps> { props ->
+    h.span {
+        className = ClassName("clickable spinner")
+        children = props.children
     }
 }
 
-external interface FiltrationProps : Props {
-    var onFilter: (String) -> Unit
+val DownOff = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▽" } }
+val DownOn = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▼" } }
+val UpOff = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"△" } }
+val UpOn = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▲" } }
+
+external interface SortControlProps : Props {
+    var sort: Boolean?
+    var action: (Boolean) -> Unit
 }
 
-val Filtration = FC<FiltrationProps> { props ->
-    var filter by useState("")
-    h.form {
-        className = ClassName("form-inline")
+/**
+ * A clickable control for two way sort direction.
+ */
+val SortControl = FC<SortControlProps> { props ->
+    val sort = props.sort
+    h.div {
+        className = ClassName("float-left ")
         h.div {
-            className = ClassName("form-group")
-            h.input {
-                className = ClassName("form-control")
-                type = InputType.search
-                placeholder = "Search..."
-                ariaLabel = "Search"
-                value = filter
-                onChange = withTargetValue { filter = it }
-            }
-            h.button {
-                className = ClassName("btn btn-outline-primary")
-                type = ButtonType.submit
-                onClick = preventDefault { props.onFilter(filter) }
-                +"Search"
-            }
+            onClick = preventDefault {
+                console.log("SORT CONTROL")
+                props.action(true) }
+            if (null == sort || !sort)
+                UpOff {}
+            else
+                UpOn {}
         }
-    }
-}
-
-external interface PaginatorProps : Props {
-    var totalPages: Int
-    var currentPage: Int
-    var onPageSelect: (Int) -> Unit
-}
-
-val Paginator = FC<PaginatorProps> { props ->
-    val preceding = props.currentPage
-    val following = props.totalPages - props.currentPage - 1
-
-    h.nav {
-        h.ul {
-            className = ClassName("pagination")
-            h.li {
-                className = ClassName("page-item")
-                h.span {
-                    className = classNames("page-link", if (0 < preceding) null else "disabled")
-                    +"Prev"
-                    onClick = { props.onPageSelect(preceding - 1) }
-                }
-            }
-            h.li {
-                className = ClassName("page-item")
-                h.span {
-                    className = ClassName("page-link disabled")
-                    +(1 + props.currentPage).toString()
-                }
-            }
-            h.li {
-                className = ClassName("page-item")
-                h.span {
-                    className = classNames("page-link", if (0 < following) null else "disabled")
-                    +"Next"
-                    onClick = { props.onPageSelect(preceding + 1) }
-                }
-            }
+        h.div {
+            onClick = preventDefault { props.action(false) }
+            if (null == sort || sort)
+                DownOff {}
+            else
+                DownOn {}
         }
     }
 }
 
 /**
  * The normal functions of a data grid (display, pagination, filtering, and sorting) are decomposed.
- * We get flexibility, but must hook a lot of stuff up.
+ * We get flexibility and separation of concerns, but must hook a lot of stuff up.
  */
 @Suppress("LocalVariableName")
 val GridleyDemo = FC<Props> {
@@ -178,35 +108,60 @@ val GridleyDemo = FC<Props> {
         low until high
     }
 
-
     Row {
         Col {
             scale = ColumnScale.Large
             size = 12
-            Paginator {
+            GridleySearch {
+                onFilter = { _filter = it }
+            }
+        }
+    }
+    h.br {}
+    Row {
+        Col {
+            scale = ColumnScale.Large
+            size = 12
+            GridleyPager {
                 totalPages = _totalPages
                 currentPage = effectivePage
                 onPageSelect = { _currentPage = it }
             }
         }
     }
+    h.br {}
     Row {
         Col {
             scale = ColumnScale.Large
             size = 12
-            Filtration {
-                onFilter = { _filter = it }
-            }
-        }
-    }
-    Row {
-        Col {
-            scale = ColumnScale.Large
-            size = 12
-            Gridley {
+            GridleyTable {
                 className = ClassName("table table-sm")
-                fields = listOf(listOf("ID"), listOf("Name"), listOf("Random", "Number"))
-                records = filtered.slice(pageBounds)
+                fields = columnHeaders.map { hdr ->
+                    FC {
+                        SortControl {
+                            action = { dir -> console.log("ACTION!", dir) }
+                        }
+                        h.div {
+                            className = ClassName("float-left")
+                            Entities.nbsp {}
+                        }
+                        h.div {
+                            className = ClassName("float-left header")
+                            hdr {}
+                        }
+                    }
+                }
+                records = filtered.slice(pageBounds).map { record ->
+                    record.map { lines ->
+                        FC {
+                            var sep = false
+                            for (line in lines) {
+                                if (sep) h.br {} else sep = true
+                                +line
+                            }
+                        }
+                    }
+                }
 
             }
         }

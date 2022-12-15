@@ -1,22 +1,15 @@
 package pages
 
 import API
-import Col
-import Container
-import Loading
 import Record
 import RecordWIP
-import Row
 import csstype.ClassName
 import emotion.react.css
 import kotlinx.coroutines.launch
 import mainScope
 import react.*
 import react.dom.events.MouseEvent
-import util.PropsSplat
-import util.classNames
-import util.preventDefault
-import util.withTargetValue
+import util.*
 import react.dom.html.ReactHTML as h
 
 private external interface RecordEditorProps : Props {
@@ -32,14 +25,14 @@ private val RecordEditor = FC<RecordEditorProps> { props ->
 
     h.form {
         h.div {
-            css(ClassName("form-group")) {}
+            className = ClassName("form-group")
             val ctrlId = "the-data"
             h.label {
                 +"Data"
                 htmlFor = ctrlId
             }
             h.input {
-                css(ClassName("form-control")) {}
+                className = ClassName("form-control")
                 id = ctrlId
                 placeholder = "..."
                 value = data
@@ -49,7 +42,7 @@ private val RecordEditor = FC<RecordEditorProps> { props ->
         h.div {
             if (null == record) {
                 h.button {
-                    css(ClassName("btn btn-primary")) {}
+                    className = ClassName("btn btn-primary")
                     +"Create"
                     onClick = preventDefault {
                         props.createRecord(RecordWIP(data))
@@ -57,7 +50,7 @@ private val RecordEditor = FC<RecordEditorProps> { props ->
                 }
             } else {
                 h.button {
-                    css(classNames("btn", "btn-primary")) {}
+                    className = classNames("btn", "btn-primary")
                     +"Update"
                     onClick = preventDefault {
                         props.updateRecord(Record(record.id, data))
@@ -76,9 +69,9 @@ private fun col(n: Int) = "col-lg-$n"
 
 private val ItemCtrl = FC<ItemCtrlProps> { props ->
     h.div {
-        css(ClassName(col(1))) {}
+        className = ClassName(col(1))
         h.span {
-            css(ClassName("clickable")) {}
+            className = ClassName("clickable")
             children = props.children
             onClick = preventDefault { props.onClick(it) }
         }
@@ -129,7 +122,7 @@ val RecordList = FC<Props> {
                 }
                 if (records!!.isEmpty()) {
                     h.div {
-                        css(ClassName("alert alert-info")) {}
+                        className = ClassName("alert alert-info")
                         +"No records."
                     }
                 }
@@ -137,7 +130,7 @@ val RecordList = FC<Props> {
                     val id = record.id
                     h.div {
                         key = id
-                        css(ClassName("row")) {}
+                        className = ClassName("row")
                         ItemCtrl {
                             +"∄"
                             onClick = preventDefault {
@@ -154,21 +147,21 @@ val RecordList = FC<Props> {
                             }
                         }
                         h.div {
-                            css(ClassName(col(5))) {}
+                            className = ClassName(col(5))
                             h.pre { +record.id }
                         }
                         h.div {
-                            css(ClassName(col(5))) {}
+                            className = ClassName(col(5))
                             h.span { +record.data }
                         }
                     }
                 }
                 h.div {
-                    css(ClassName("row")) {}
+                    className = ClassName("row")
                     h.div {
-                        css(ClassName(col(1))) {}
+                        className = ClassName(col(1))
                         h.button {
-                            css(ClassName("btn btn-primary")) {}
+                            className = ClassName("btn btn-primary")
                             h.em { +"+" }
                             onClick = preventDefault {
                                 createNew = true
