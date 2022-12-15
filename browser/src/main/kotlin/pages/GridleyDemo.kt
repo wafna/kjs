@@ -105,25 +105,6 @@ fun randomString(chars: List<Char>, length: Int): String {
     }
 }
 
-val GridleyDemo = FC<Props> {
-    val totalRecords = 1800
-    val chars = ('A'..'Z').toList()
-    val digits = ('0'..'9').toList()
-    val allRecords = (0 until totalRecords).map { i ->
-        listOf(
-            listOf(i.toString()),
-            listOf(randomString(chars, 32)),
-            listOf(randomString(digits, 32)),
-            listOf(Random.nextBoolean().toString(), Random.nextBoolean().toString())
-        )
-    }
-
-    Gridley {
-        records = allRecords
-        pageSize = 15
-    }
-}
-
 external interface GridleyProps : Props {
     var records: List<List<List<String>>>
     var pageSize: Int
@@ -175,18 +156,20 @@ val Gridley = FC<GridleyProps> { props ->
     Row {
         Col {
             scale = ColumnScale.Large
-            size = 6
-            GridleyPager {
-                totalPages = _totalPages
-                currentPage = effectivePage
-                onPageSelect = { _currentPage = it }
+            size = 12
+            h.div {
+                className = ClassName("float-left")
+                GridleyPager {
+                    totalPages = _totalPages
+                    currentPage = effectivePage
+                    onPageSelect = { _currentPage = it }
+                }
             }
-        }
-        Col {
-            scale = ColumnScale.Large
-            size = 6
-            GridleySearch {
-                onFilter = { _filter = it }
+            h.div {
+                className = ClassName("float-right")
+                GridleySearch {
+                    onFilter = { _filter = it }
+                }
             }
         }
     }
@@ -255,3 +238,21 @@ val Gridley = FC<GridleyProps> { props ->
     }
 }
 
+val GridleyDemo = FC<Props> {
+    val totalRecords = 1800
+    val chars = ('A'..'Z').toList()
+    val digits = ('0'..'9').toList()
+    val allRecords = (0 until totalRecords).map { i ->
+        listOf(
+            listOf(i.toString()),
+            listOf(randomString(chars, 32)),
+            listOf(randomString(digits, 32)),
+            listOf(Random.nextBoolean().toString(), Random.nextBoolean().toString())
+        )
+    }
+
+    Gridley {
+        records = allRecords
+        pageSize = 15
+    }
+}

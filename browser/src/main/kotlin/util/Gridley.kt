@@ -93,8 +93,16 @@ val GridleyPager = FC<GridleyPagerProps> { props ->
             ReactHTML.li {
                 className = ClassName("page-item")
                 ReactHTML.span {
+                    className = classNames("page-link", if (1 < preceding) null else "disabled")
+                    +"⟪"
+                    onClick = { props.onPageSelect(0) }
+                }
+            }
+            ReactHTML.li {
+                className = ClassName("page-item")
+                ReactHTML.span {
                     className = classNames("page-link", if (0 < preceding) null else "disabled")
-                    +"Prev"
+                    +"⟨"
                     onClick = { props.onPageSelect(preceding - 1) }
                 }
             }
@@ -109,8 +117,16 @@ val GridleyPager = FC<GridleyPagerProps> { props ->
                 className = ClassName("page-item")
                 ReactHTML.span {
                     className = classNames("page-link", if (0 < following) null else "disabled")
-                    +"Next"
+                    +"⟩"
                     onClick = { props.onPageSelect(preceding + 1) }
+                }
+            }
+            ReactHTML.li {
+                className = ClassName("page-item")
+                ReactHTML.span {
+                    className = classNames("page-link", if (1 < following) null else "disabled")
+                    +"》"
+                    onClick = { props.onPageSelect(props.totalPages - 1) }
                 }
             }
         }
