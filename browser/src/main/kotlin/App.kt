@@ -1,6 +1,6 @@
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import pages.GridleyDemo
+import pages.GridleyDemoRecordSource
 import pages.RecordList
 import pages.TimerDemo
 import react.FC
@@ -40,7 +40,7 @@ object TimerDemoPage : Route {
 
 object GridleyDemoPage : Route {
     override val routeId: String = "gridley-demo"
-    override fun component(params: Params): FC<Props> = GridleyDemo
+    override fun component(params: Params): FC<Props> = GridleyDemoRecordSource
 }
 
 private val routes = listOf(APIDemoPage, TimerDemoPage, GridleyDemoPage)

@@ -18,6 +18,7 @@ typealias DisplayLine = List<FC<Props>>
 external interface GridleyTableProps : PropsWithClassName {
     var fields: DisplayLine
     var records: List<DisplayLine>
+    var empty: FC<Props>
 }
 
 val GridleyTable = FC<GridleyTableProps> { props ->
@@ -25,10 +26,7 @@ val GridleyTable = FC<GridleyTableProps> { props ->
     val records = props.records
 
     if (records.isEmpty()) {
-        ReactHTML.div {
-            className = ClassName("alert alert-warning")
-            ReactHTML.h3 { +"No records." }
-        }
+        props.empty {}
     } else {
 
         ReactHTML.table {

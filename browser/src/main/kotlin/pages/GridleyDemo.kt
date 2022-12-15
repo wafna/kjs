@@ -105,8 +105,10 @@ fun randomString(chars: List<Char>, length: Int): String {
     }
 }
 
+data class GridRecord(val id: Int, val name: String, val number: String, val stuff: Pair<Boolean, Boolean>)
+
 external interface GridleyProps : Props {
-    var records: List<List<List<String>>>
+    var records: List<GridRecord>
     var pageSize: Int
 }
 
@@ -115,7 +117,7 @@ external interface GridleyProps : Props {
  * We get flexibility and separation of concerns, but must do a lot for ourselves..
  */
 @Suppress("LocalVariableName")
-val Gridley = FC<GridleyProps> { props ->
+val GridleyDemo = FC<GridleyProps> { props ->
     var _currentPage by useState(0)
     var _filter by useState("")
     var _sortKey: SortKey? by useState(null)
@@ -123,11 +125,13 @@ val Gridley = FC<GridleyProps> { props ->
     // First, filter, then sort.
     val processedRecords =
         if (_filter.isEmpty()) props.records else {
-            props.records.filter { record -> record.any { lines -> lines.any { it.contains(_filter) } } }
+            props.records.filter { record ->
+                listOf(record.id.toString(), record.name, record.number).any { it.contains(_filter) }
+            }
         }.let { filtered ->
             // Here, we're free to represent the fields in the record in any way we want for the purposes of sorting.
             if (null == _sortKey) filtered else {
-                fun <S : Comparable<S>> directionalSort(sortingFunction: (List<List<String>>) -> S) =
+                fun <S : Comparable<S>> directionalSort(sortingFunction: (GridRecord) -> S) =
                     when (_sortKey!!.sortDir) {
                         SortDir.Ascending ->
                             filtered.sortedBy { sortingFunction(it) }
@@ -136,9 +140,14 @@ val Gridley = FC<GridleyProps> { props ->
                     }
                 when (val sortIndex = _sortKey!!.index) {
                     // Numerical sort on id.
-                    0 -> directionalSort { it[sortIndex][0].toInt() }
+                    0 -> directionalSort { it.id }
                     // Textual sort on everything else.
-                    else -> directionalSort { it[sortIndex].joinToString("") }
+                    1 -> directionalSort { it.name }
+                    3 -> directionalSort { it.number }
+                    else -> {
+                        console.warn("Invalid sort key index: $sortIndex")
+                        directionalSort { true }
+                    }
                 }
             }
         }
@@ -186,7 +195,6 @@ val Gridley = FC<GridleyProps> { props ->
                         SortControl {
                             sortDir = _sortKey?.let { if (index == it.index) it.sortDir else null }
                             action = { dir ->
-                                console.log("ACTION!", dir)
                                 _sortKey = SortKey(index, dir)
                             }
                         }
@@ -201,58 +209,63 @@ val Gridley = FC<GridleyProps> { props ->
                     }
                 }
                 records = processedRecords.slice(pageBounds).map { record ->
-                    record.withIndex().map { p ->
-                        val lines = p.value
+                    listOf(
+                        FC { +record.id.toString() },
+                        FC { h.pre { +record.name } },
+                        FC { h.pre { +record.number } },
                         FC {
-                            var sep = false
-                            for (line in lines) {
-                                if (sep) h.br {} else sep = true
-                                when (p.index) {
-                                    1 -> h.pre { +line }
-                                    2 -> h.pre { +line }
-                                    3 -> when (line) {
-                                        "true" ->
-                                            h.span {
-                                                css {
-                                                    color = Color("#008000")
-                                                }
-                                                +"✓"
-                                            }
-                                        "false" ->
-                                            h.span {
-                                                css {
-                                                    color = Color("#800000")
-                                                }
-                                                +"X"
-                                            }
-                                        else -> +"?"
+                            fun stuff(s: Boolean) {
+                                if (s) {
+                                    h.span {
+                                        css {
+                                            color = Color("#008000")
+                                        }
+                                        +"✓"
                                     }
-                                    else -> +line
+                                } else {
+                                    h.span {
+                                        css {
+                                            color = Color("#800000")
+                                        }
+                                        +"X"
+                                    }
                                 }
                             }
+                            stuff(record.stuff.first)
+                            h.br {}
+                            stuff(record.stuff.second)
                         }
+                    )
+                }
+                empty = FC {
+                    react.dom.html.ReactHTML.div {
+                        className = ClassName("alert alert-warning")
+                        react.dom.html.ReactHTML.h3 { +"No records." }
                     }
                 }
+
             }
         }
     }
 }
 
-val GridleyDemo = FC<Props> {
+/**
+ * This fronts for the demo by creating some records.
+ */
+val GridleyDemoRecordSource = FC<Props> {
     val totalRecords = 1800
     val chars = ('A'..'Z').toList()
     val digits = ('0'..'9').toList()
-    val allRecords = (0 until totalRecords).map { i ->
-        listOf(
-            listOf(i.toString()),
-            listOf(randomString(chars, 32)),
-            listOf(randomString(digits, 32)),
-            listOf(Random.nextBoolean().toString(), Random.nextBoolean().toString())
-        )
-    }
 
-    Gridley {
-        records = allRecords
+    GridleyDemo {
+        records = (0 until totalRecords).map { id ->
+            GridRecord(
+                id,
+                randomString(chars, 32),
+                randomString(digits, 32),
+                Pair(Random.nextBoolean(), Random.nextBoolean())
+            )
+        }
         pageSize = 15
     }
 }
