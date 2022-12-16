@@ -6,6 +6,9 @@ import react.Props
 import react.PropsWithClassName
 import react.dom.html.ReactHTML as h
 
+/**
+ * A list of components to be embedded in a row in a table.
+ */
 typealias DisplayLine = List<FC<Props>>
 
 external interface GridleyDisplayProps : PropsWithClassName {
@@ -27,7 +30,6 @@ external interface GridleyDisplayProps : PropsWithClassName {
 
 /**
  * Creates a table with the supplied className and renders the header and row data into it.
- * This renders ALL the records given to it; pagination is handled elsewhere.
  */
 val GridleyDisplay = FC<GridleyDisplayProps> { props ->
 
