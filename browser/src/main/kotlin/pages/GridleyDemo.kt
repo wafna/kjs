@@ -69,15 +69,12 @@ data class GridRecord(val id: Int, val name: String, val number: String, val stu
 private data class SortKey(val index: Int, val sortDir: SortDir)
 
 external interface GridleyProps<R> : Props {
-    var records: List<R>
+    var recordSet: List<R>
     var pageSize: Int
 }
 
 /**
- * The Gridley system decomposes the normal functions of a data grid (display, pagination, filtering, and sorting).
- *
- * This is one example of how to wire them all up.
- * The important point to note is that the contents of the display (in this example a table) are entirely defined here.
+ * This is the nexus of the grid where all the bits are wired together.
  */
 @Suppress("LocalVariableName")
 val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
@@ -90,10 +87,11 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
 
     val filteredRecords =
         if (searchTarget.isEmpty()) {
-            props.records
+            props.recordSet
         } else {
-            props.records.filter { record ->
-                listOf(record.id.toString(), record.name, record.number).any { it.contains(searchTarget) }
+            props.recordSet.filter { record ->
+                inline fun hit(s: String) = s.contains(searchTarget)
+                hit(record.id.toString()) || hit(record.name) || hit(record.number)
             }
         }
     val totalRecords = filteredRecords.size
@@ -121,11 +119,11 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                 }
             }
         }
-    // The records we'll actually display.
-    val displayRecords = let {
+    // The page of records we'll actually display.
+    val displayRecords = sortedRecords.apply {
         val low = max(0, effectivePage * props.pageSize)
         val high = min((1 + effectivePage) * props.pageSize, totalRecords)
-        sortedRecords.slice(low until high)
+        slice(low until high)
     }
 
     Row {
@@ -222,7 +220,7 @@ val GridleyDemoRecordSource = FC<Props> {
 
     GridleyDemo {
         pageSize = 15
-        records = (0 until totalRecords).map { id ->
+        recordSet = (0 until totalRecords).map { id ->
             GridRecord(
                 id,
                 randomString(chars, 32),
