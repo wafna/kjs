@@ -3,8 +3,10 @@ package pages
 import csstype.ClassName
 import csstype.Color
 import emotion.react.css
+import pages.gridley.*
 import react.*
 import util.*
+import util.Entities.nbsp
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -12,60 +14,8 @@ import kotlin.math.min
 import kotlin.random.Random
 import react.dom.html.ReactHTML as h
 
-data class SortKey(val index: Int, val sortDir: SortDir)
-
-external interface SortIconProps : PropsWithChildren, PropsWithClassName
-
 /**
- * A clickable control for a single sort direction.
- */
-val SortIcon = FC<SortIconProps> { props ->
-    h.span {
-        className = ClassName("clickable spinner")
-        children = props.children
-    }
-}
-
-val DownOff = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▽" } }
-val DownOn = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▼" } }
-val UpOff = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"△" } }
-val UpOn = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▲" } }
-
-enum class SortDir {
-    Ascending, Descending
-}
-
-external interface SortControlProps : Props {
-    var sortDir: SortDir?
-    var action: (SortDir) -> Unit
-}
-
-/**
- * A clickable control for two way sort direction.
- */
-val SortControl = FC<SortControlProps> { props ->
-    val sort = props.sortDir
-    h.div {
-        className = ClassName("float-left ")
-        h.div {
-            onClick = preventDefault { props.action(SortDir.Ascending) }
-            if (sort == SortDir.Ascending)
-                UpOn {}
-            else
-                UpOff {}
-        }
-        h.div {
-            onClick = preventDefault { props.action(SortDir.Descending) }
-            if (sort == SortDir.Descending)
-                DownOn {}
-            else
-                DownOff {}
-        }
-    }
-}
-
-/**
- * The style and method of displaying the column headers.
+ * Table cell contents for each of the column headers.
  * Sort controls are added at render, below, when we know the sort key state.
  */
 val columnHeaders = listOf<FC<Props>>(
@@ -105,25 +55,32 @@ fun randomString(chars: List<Char>, length: Int): String {
     }
 }
 
+/**
+ * Our custom record data type.
+ */
 data class GridRecord(val id: Int, val name: String, val number: String, val stuff: Pair<Boolean, Boolean>)
 
-external interface GridleyProps : Props {
-    var records: List<GridRecord>
+external interface GridleyProps<R> : Props {
+    var records: List<R>
     var pageSize: Int
 }
 
 /**
- * The normal functions of a data grid (display, pagination, filtering, and sorting) are decomposed.
- * We get flexibility and separation of concerns, but must do a lot for ourselves..
+ * The Gridley system decomposes the normal functions of a data grid (display, pagination, filtering, and sorting).
+ *
+ * This is one example of how to wire them all up.
  */
 @Suppress("LocalVariableName")
-val GridleyDemo = FC<GridleyProps> { props ->
+val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
     var _currentPage by useState(0)
     var _filter by useState("")
     var _sortKey: SortKey? by useState(null)
 
-    // First, filter, then sort.
+    // We have some options here, depending on whether we want our sorts to be stable relative to previous sorts.
+    // Here, we resort from the original list.
+    // We could, instead, apply the sort to the entire record set and save it in state,
     val processedRecords =
+        // First, filter, then sort.
         if (_filter.isEmpty()) props.records else {
             props.records.filter { record ->
                 listOf(record.id.toString(), record.name, record.number).any { it.contains(_filter) }
@@ -143,10 +100,10 @@ val GridleyDemo = FC<GridleyProps> { props ->
                     0 -> directionalSort { it.id }
                     // Textual sort on everything else.
                     1 -> directionalSort { it.name }
-                    3 -> directionalSort { it.number }
+                    2 -> directionalSort { it.number }
                     else -> {
                         console.warn("Invalid sort key index: $sortIndex")
-                        directionalSort { true }
+                        directionalSort { false }
                     }
                 }
             }
@@ -189,18 +146,20 @@ val GridleyDemo = FC<GridleyProps> { props ->
             size = 12
             GridleyTable {
                 className = ClassName("table table-sm")
-                fields = columnHeaders.withIndex().map { p ->
+                headers = columnHeaders.withIndex().map { p ->
                     val index = p.index
                     FC {
-                        SortControl {
-                            sortDir = _sortKey?.let { if (index == it.index) it.sortDir else null }
-                            action = { dir ->
-                                _sortKey = SortKey(index, dir)
+                        if (index != 3) {
+                            SortControl {
+                                sortDir = _sortKey?.let { if (index == it.index) it.sortDir else null }
+                                action = { dir ->
+                                    _sortKey = SortKey(index, dir)
+                                }
                             }
-                        }
-                        h.div {
-                            className = ClassName("float-left")
-                            Entities.nbsp {}
+                            h.div {
+                                className = ClassName("float-left")
+                                nbsp()
+                            }
                         }
                         h.div {
                             className = ClassName("float-left header")

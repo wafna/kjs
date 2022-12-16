@@ -1,12 +1,10 @@
 package util
 
 import csstype.ClassName
-import emotion.react.css
+import react.ChildrenBuilder
 import react.FC
 import react.Props
 import react.PropsWithChildren
-import util.HashRoute
-import util.PropsSplat
 import react.dom.html.ReactHTML as h
 
 val Loading = FC<Props> {
@@ -91,6 +89,6 @@ val ErrorPage = FC<ErrorPageProps> { props ->
 }
 
 object Entities {
-    val nbsp = FC<Props> { +"\u00A0" }
+    fun ChildrenBuilder.nbsp() = +"\u00A0"
 }
 
