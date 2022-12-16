@@ -64,6 +64,11 @@ fun randomString(chars: List<Char>, length: Int): String {
  */
 data class GridRecord(val id: Int, val name: String, val number: String, val stuff: Pair<Boolean, Boolean>)
 
+/**
+ * Keeping track of the column on and direction in which sorting is to be applied.
+ */
+private data class SortKey(val index: Int, val sortDir: SortDir)
+
 external interface GridleyProps<R> : Props {
     var records: List<R>
     var pageSize: Int
@@ -77,55 +82,52 @@ external interface GridleyProps<R> : Props {
  */
 @Suppress("LocalVariableName")
 val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
-    var _currentPage by useState(0)
-    var _filter by useState("")
+    var selectedPage by useState(0)
+    var searchTarget by useState("")
     var _sortKey: SortKey? by useState(null)
 
-    // We have some options here, depending on whether we want our sorts to be stable relative to previous sorts.
-    // Here, we sort the original list on the updated sort key.
-    // We could, instead, save the records in state and update that when a new sort key is applied,
-    // thus making the sorts stable
-    val processedRecords =
-        // First, filter.
-        if (_filter.isEmpty())
+    // Below, we have to calculate many things, first and foremost being which records we'll display.
+    // We also need to calculate
+
+    val filteredRecords =
+        if (searchTarget.isEmpty())
             props.records
         else {
             props.records.filter { record ->
-                listOf(record.id.toString(), record.name, record.number).any { it.contains(_filter) }
+                listOf(record.id.toString(), record.name, record.number).any { it.contains(searchTarget) }
             }
-        }.let { filtered ->
-            // Then, sort.
-            // Here, we're free to represent the fields in the record in any way we want for the purposes of sorting.
-            if (null == _sortKey) filtered else {
-                fun <S : Comparable<S>> directionalSort(sortingFunction: (GridRecord) -> S) =
-                    when (_sortKey!!.sortDir) {
-                        SortDir.Ascending ->
-                            filtered.sortedBy { sortingFunction(it) }
-                        SortDir.Descending ->
-                            filtered.sortedByDescending { sortingFunction(it) }
-                    }
-                when (val sortIndex = _sortKey!!.index) {
-                    // Numerical sort on id.
-                    0 -> directionalSort { it.id }
-                    // Textual sort on everything else.
-                    1 -> directionalSort { it.name }
-                    2 -> directionalSort { it.number }
-                    else -> {
-                        console.warn("Invalid sort key index: $sortIndex")
-                        directionalSort { false }
-                    }
+        }
+    val totalRecords = filteredRecords.size
+    val pageCount = ceil(totalRecords.toDouble() / props.pageSize).toInt()
+    // Ensure we're on an actual page.
+    val effectivePage = if (selectedPage >= pageCount) pageCount - 1 else selectedPage
+    val sortedRecords =
+        if (null == _sortKey) filteredRecords else {
+            fun <S : Comparable<S>> directionalSort(sortingFunction: (GridRecord) -> S) =
+                when (_sortKey!!.sortDir) {
+                    SortDir.Ascending ->
+                        filteredRecords.sortedBy { sortingFunction(it) }
+                    SortDir.Descending ->
+                        filteredRecords.sortedByDescending { sortingFunction(it) }
+                }
+            when (val sortIndex = _sortKey!!.index) {
+                // Numerical sort on id.
+                0 -> directionalSort { it.id }
+                // Lexical sort on everything else.
+                1 -> directionalSort { it.name }
+                2 -> directionalSort { it.number }
+                else -> {
+                    console.warn("Invalid sort key index: $sortIndex")
+                    filteredRecords
                 }
             }
         }
-    val _totalPages = ceil(processedRecords.size.toDouble() / props.pageSize).toInt()
 
-    // Ensure we're on an actual page.
-    val effectivePage = if (_currentPage >= _totalPages) _totalPages - 1 else _currentPage
-
-    val pageBounds = processedRecords.size.let { totalRecords ->
+    // The records we'll actually display.
+    val recordSlice = let {
         val low = max(0, effectivePage * props.pageSize)
         val high = min((1 + effectivePage) * props.pageSize, totalRecords)
-        low until high
+        sortedRecords.slice(low until high)
     }
 
     Row {
@@ -135,15 +137,15 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
             h.div {
                 className = ClassName("float-left")
                 GridleyPager {
-                    totalPages = _totalPages
+                    totalPages = pageCount
                     currentPage = effectivePage
-                    onPageSelect = { _currentPage = it }
+                    onPageSelect = { selectedPage = it }
                 }
             }
             h.div {
                 className = ClassName("float-right")
                 GridleySearch {
-                    onFilter = { _filter = it }
+                    onSearch = { searchTarget = it }
                 }
             }
         }
@@ -155,6 +157,7 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
             size = 12
             GridleyDisplay {
                 className = ClassName("table table-sm")
+                // Render the column headers to an array of components.
                 headers = columnHeaders.withIndex().map { p ->
                     val index = p.index
                     FC {
@@ -176,7 +179,8 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                         }
                     }
                 }
-                records = processedRecords.slice(pageBounds).map { record ->
+                // Render each record to an array of components.
+                records = recordSlice.map { record ->
                     listOf(
                         FC { +record.id.toString() },
                         FC { h.pre { +record.name } },
@@ -206,9 +210,9 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                     )
                 }
                 empty = FC {
-                    react.dom.html.ReactHTML.div {
+                    h.div {
                         className = ClassName("alert alert-warning")
-                        react.dom.html.ReactHTML.h3 { +"No records." }
+                        h.h3 { +"No records." }
                     }
                 }
             }

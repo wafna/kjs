@@ -1,9 +1,10 @@
 package pages.gridley
 
+import csstype.ClassName
 import react.FC
 import react.Props
 import react.PropsWithClassName
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML as h
 
 typealias DisplayLine = List<FC<Props>>
 
@@ -32,28 +33,31 @@ val GridleyDisplay = FC<GridleyDisplayProps> { props ->
 
     val records = props.records
 
-    if (records.isEmpty()) {
-        props.empty {}
-    } else {
-
-        ReactHTML.table {
-            className = props.className
-            ReactHTML.thead {
-                ReactHTML.tr {
-                    for (header in props.headers) {
-                        ReactHTML.th { header {} }
+    h.div {
+        h.div {
+            className = ClassName("flow-down")
+            h.table {
+                className = props.className
+                h.thead {
+                    h.tr {
+                        for (header in props.headers) {
+                            h.th { header {} }
+                        }
                     }
                 }
-            }
-            ReactHTML.tbody {
-                for (record in records) {
-                    ReactHTML.tr {
-                        for (field in record) {
-                            ReactHTML.td { field {} }
+                h.tbody {
+                    for (record in records) {
+                        h.tr {
+                            for (field in record) {
+                                h.td { field {} }
+                            }
                         }
                     }
                 }
             }
+        }
+        if (records.isEmpty()) {
+            props.empty {}
         }
     }
 }

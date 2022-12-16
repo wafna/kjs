@@ -10,7 +10,7 @@ import react.useState
 import util.withTargetValue
 
 external interface GridleySearchProps : Props {
-    var onFilter: (String) -> Unit
+    var onSearch: (String) -> Unit
 }
 
 val GridleySearch = FC<GridleySearchProps> { props ->
@@ -24,7 +24,7 @@ val GridleySearch = FC<GridleySearchProps> { props ->
         size = 48
         onChange = withTargetValue {
             filter = it
-            props.onFilter(it)
+            props.onSearch(it)
         }
         autoFocus = true
     }
