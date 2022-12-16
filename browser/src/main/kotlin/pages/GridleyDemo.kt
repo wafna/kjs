@@ -57,6 +57,10 @@ fun randomString(chars: List<Char>, length: Int): String {
 
 /**
  * Our custom record data type.
+ * @param id This will be sorted numerically.
+ * @param name A string of random lower case letters (for sorting and searching).
+ * @param number A string of random decimal digits (for sorting and searching).
+ * @param stuff An excuse to do some pretty UI.
  */
 data class GridRecord(val id: Int, val name: String, val number: String, val stuff: Pair<Boolean, Boolean>)
 
@@ -69,6 +73,7 @@ external interface GridleyProps<R> : Props {
  * The Gridley system decomposes the normal functions of a data grid (display, pagination, filtering, and sorting).
  *
  * This is one example of how to wire them all up.
+ * The important point to note is that the contents of the display (in this example a table) are entirely defined here.
  */
 @Suppress("LocalVariableName")
 val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
@@ -77,15 +82,19 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
     var _sortKey: SortKey? by useState(null)
 
     // We have some options here, depending on whether we want our sorts to be stable relative to previous sorts.
-    // Here, we resort from the original list.
-    // We could, instead, apply the sort to the entire record set and save it in state,
+    // Here, we sort the original list on the updated sort key.
+    // We could, instead, save the records in state and update that when a new sort key is applied,
+    // thus making the sorts stable
     val processedRecords =
-        // First, filter, then sort.
-        if (_filter.isEmpty()) props.records else {
+        // First, filter.
+        if (_filter.isEmpty())
+            props.records
+        else {
             props.records.filter { record ->
                 listOf(record.id.toString(), record.name, record.number).any { it.contains(_filter) }
             }
         }.let { filtered ->
+            // Then, sort.
             // Here, we're free to represent the fields in the record in any way we want for the purposes of sorting.
             if (null == _sortKey) filtered else {
                 fun <S : Comparable<S>> directionalSort(sortingFunction: (GridRecord) -> S) =
@@ -144,7 +153,7 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
         Col {
             scale = ColumnScale.Large
             size = 12
-            GridleyTable {
+            GridleyDisplay {
                 className = ClassName("table table-sm")
                 headers = columnHeaders.withIndex().map { p ->
                     val index = p.index
@@ -202,7 +211,6 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                         react.dom.html.ReactHTML.h3 { +"No records." }
                     }
                 }
-
             }
         }
     }
@@ -210,13 +218,15 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
 
 /**
  * This fronts for the demo by creating some records.
+ * The data in the records are intended to make it easy to narrow down the page count.
  */
 val GridleyDemoRecordSource = FC<Props> {
     val totalRecords = 1800
-    val chars = ('A'..'Z').toList()
+    val chars = ('a'..'z').toList()
     val digits = ('0'..'9').toList()
 
     GridleyDemo {
+        pageSize = 15
         records = (0 until totalRecords).map { id ->
             GridRecord(
                 id,
@@ -225,6 +235,5 @@ val GridleyDemoRecordSource = FC<Props> {
                 Pair(Random.nextBoolean(), Random.nextBoolean())
             )
         }
-        pageSize = 15
     }
 }

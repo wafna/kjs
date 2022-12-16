@@ -7,7 +7,7 @@ import react.dom.html.ReactHTML
 
 typealias DisplayLine = List<FC<Props>>
 
-external interface GridleyTableProps : PropsWithClassName {
+external interface GridleyDisplayProps : PropsWithClassName {
     /**
      * List of components for the table header.
      */
@@ -28,7 +28,7 @@ external interface GridleyTableProps : PropsWithClassName {
  * Creates a table with the supplied className and renders the header and row data into it.
  * This renders ALL the records given to it; pagination is handled elsewhere.
  */
-val GridleyTable = FC<GridleyTableProps> { props ->
+val GridleyDisplay = FC<GridleyDisplayProps> { props ->
 
     val records = props.records
 

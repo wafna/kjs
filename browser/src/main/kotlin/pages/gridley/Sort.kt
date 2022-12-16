@@ -15,17 +15,17 @@ external interface SortIconProps : PropsWithChildren, PropsWithClassName
 /**
  * A clickable control for a single sort direction.
  */
-val SortIcon = FC<SortIconProps> { props ->
+fun sortIcon(text: String) = FC<SortIconProps> { props ->
     ReactHTML.span {
-        className = ClassName("clickable spinner")
-        children = props.children
+        className = ClassName("float-down clickable spinner")
+        +text
     }
 }
 
-val DownOff = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▽" } }
-val DownOn = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▼" } }
-val UpOff = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"△" } }
-val UpOn = FC<SortIconProps> { SortIcon { className = ClassName("float-down spinner"); +"▲" } }
+val DownOff = sortIcon("▽")
+val DownOn = sortIcon("▼")
+val UpOff = sortIcon("△")
+val UpOn = sortIcon("▲")
 
 enum class SortDir {
     Ascending, Descending
