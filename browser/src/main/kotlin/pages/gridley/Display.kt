@@ -3,7 +3,6 @@ package pages.gridley
 import csstype.ClassName
 import react.FC
 import react.Props
-import react.PropsWithClassName
 import react.dom.html.ReactHTML as h
 
 /**
@@ -11,7 +10,7 @@ import react.dom.html.ReactHTML as h
  */
 typealias DisplayLine = List<FC<Props>>
 
-external interface GridleyDisplayProps : PropsWithClassName {
+external interface GridleyDisplayProps : Props {
     /**
      * List of components for the table header.
      */
@@ -39,7 +38,7 @@ val GridleyDisplay = FC<GridleyDisplayProps> { props ->
         h.div {
             className = ClassName("flow-down")
             h.table {
-                className = props.className
+                className = ClassName("table table-sm gridley-header")
                 h.thead {
                     h.tr {
                         for (header in props.headers) {

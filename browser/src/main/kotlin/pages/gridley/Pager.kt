@@ -3,7 +3,7 @@ package pages.gridley
 import csstype.ClassName
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML
+import react.dom.html.ReactHTML as h
 
 external interface GridleyPagerProps : Props {
     var totalPages: Int
@@ -22,43 +22,43 @@ val GridleyPager = FC<GridleyPagerProps> { props ->
     val preceding = props.currentPage
     val following = props.totalPages - props.currentPage - 1
 
-    ReactHTML.nav {
-        ReactHTML.ul {
+    h.nav {
+        h.ul {
             className = ClassName("pagination")
-            ReactHTML.li {
+            h.li {
                 className = PageItem
-                ReactHTML.span {
+                h.span {
                     className = if (1 < preceding) PageLink else PageLinkDisabled
                     +"⟪"
                     onClick = { props.onPageSelect(0) }
                 }
             }
-            ReactHTML.li {
+            h.li {
                 className = PageItem
-                ReactHTML.span {
+                h.span {
                     className = if (0 < preceding) PageLink else PageLinkDisabled
                     +"⟨"
                     onClick = { props.onPageSelect(preceding - 1) }
                 }
             }
-            ReactHTML.li {
+            h.li {
                 className = PageItem
-                ReactHTML.span {
+                h.span {
                     className = PageLinkDisabled
                     +(1 + preceding).toString()
                 }
             }
-            ReactHTML.li {
+            h.li {
                 className = PageItem
-                ReactHTML.span {
+                h.span {
                     className = if (0 < following) PageLink else PageLinkDisabled
                     +"⟩"
                     onClick = { props.onPageSelect(preceding + 1) }
                 }
             }
-            ReactHTML.li {
+            h.li {
                 className = PageItem
-                ReactHTML.span {
+                h.span {
                     className = if (1 < following) PageLink else PageLinkDisabled
                     +"》"
                     onClick = { props.onPageSelect(props.totalPages - 1) }

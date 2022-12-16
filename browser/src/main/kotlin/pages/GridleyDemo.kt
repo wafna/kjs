@@ -6,7 +6,6 @@ import emotion.react.css
 import pages.gridley.*
 import react.*
 import util.*
-import util.Entities.nbsp
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -87,7 +86,7 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
     var _sortKey: SortKey? by useState(null)
 
     // Below, we have to calculate many things, first and foremost being which records we'll display.
-    // We also need to calculate
+    // We also need to calculate some values for the pager.
 
     val filteredRecords =
         if (searchTarget.isEmpty())
@@ -102,7 +101,9 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
     // Ensure we're on an actual page.
     val effectivePage = if (selectedPage >= pageCount) pageCount - 1 else selectedPage
     val sortedRecords =
-        if (null == _sortKey) filteredRecords else {
+        if (null == _sortKey)
+            filteredRecords
+        else {
             fun <S : Comparable<S>> directionalSort(sortingFunction: (GridRecord) -> S) =
                 when (_sortKey!!.sortDir) {
                     SortDir.Ascending ->
@@ -156,7 +157,6 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
             scale = ColumnScale.Large
             size = 12
             GridleyDisplay {
-                className = ClassName("table table-sm gridley-header")
                 // Render the column headers to an array of components.
                 headers = columnHeaders.withIndex().map { p ->
                     val index = p.index

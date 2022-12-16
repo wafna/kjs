@@ -5,9 +5,9 @@ import react.FC
 import react.Props
 import react.dom.aria.ariaLabel
 import react.dom.html.InputType
-import react.dom.html.ReactHTML
 import react.useState
 import util.withTargetValue
+import react.dom.html.ReactHTML as h
 
 external interface GridleySearchProps : Props {
     var onSearch: (String) -> Unit
@@ -15,7 +15,7 @@ external interface GridleySearchProps : Props {
 
 val GridleySearch = FC<GridleySearchProps> { props ->
     var filter by useState("")
-    ReactHTML.input {
+    h.input {
         className = ClassName("form-control")
         type = InputType.search
         placeholder = "Search..."
