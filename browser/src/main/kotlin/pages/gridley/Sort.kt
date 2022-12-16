@@ -38,7 +38,7 @@ external interface SortControlProps : Props {
 val SortControl = FC<SortControlProps> { props ->
     val sort = props.sortDir
     h.div {
-        className = ClassName("float-left ")
+        className = ClassName("sort-control-box")
         h.div {
             onClick = preventDefault { props.action(SortDir.Ascending) }
             if (sort == SortDir.Ascending)

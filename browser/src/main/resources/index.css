@@ -27,6 +27,11 @@ body {
     align-content: center;
 }
 
-.header {
+.sort-control-box {
+    margin-right: 8px;
+}
+
+.gridley-header {
     vertical-align: center;
+    /*margin: 0 auto;*/
 }

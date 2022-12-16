@@ -21,25 +21,25 @@ import react.dom.html.ReactHTML as h
 val columnHeaders = listOf<FC<Props>>(
     FC {
         h.div {
-            className = ClassName("float-right")
+            className = ClassName("gridley-header")
             +"Id"
         }
     },
     FC {
         h.div {
-            className = ClassName("float-right")
+            className = ClassName("gridley-header")
             +"Name"
         }
     },
     FC {
         h.div {
-            className = ClassName("float-right")
+            className = ClassName("gridley-header")
             +"Number"
         }
     },
     FC {
         h.div {
-            className = ClassName("float-right")
+            className = ClassName("gridley-header")
             +"This"; h.br {}; +"That"
         }
     })
@@ -156,26 +156,23 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
             scale = ColumnScale.Large
             size = 12
             GridleyDisplay {
-                className = ClassName("table table-sm")
+                className = ClassName("table table-sm gridley-header")
                 // Render the column headers to an array of components.
                 headers = columnHeaders.withIndex().map { p ->
                     val index = p.index
                     FC {
                         // Sorting for all but the last column.
                         if (index != 3) {
-                            SortControl {
-                                sortDir = _sortKey?.let { if (index == it.index) it.sortDir else null }
-                                action = { dir ->
-                                    _sortKey = SortKey(index, dir)
-                                }
-                            }
                             h.div {
-                                className = ClassName("float-left")
-                                nbsp()
+                                className = ClassName("float-left ")
+                                SortControl {
+                                    sortDir = _sortKey?.let { if (index == it.index) it.sortDir else null }
+                                    action = { _sortKey = SortKey(index, it) }
+                                }
                             }
                         }
                         h.div {
-                            className = ClassName("float-left header")
+                            className = ClassName("float-left")
                             p.value {}
                         }
                     }
