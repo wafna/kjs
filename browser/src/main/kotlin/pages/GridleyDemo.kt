@@ -89,9 +89,9 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
     // We also need to calculate some values for the pager.
 
     val filteredRecords =
-        if (searchTarget.isEmpty())
+        if (searchTarget.isEmpty()) {
             props.records
-        else {
+        } else {
             props.records.filter { record ->
                 listOf(record.id.toString(), record.name, record.number).any { it.contains(searchTarget) }
             }
@@ -101,9 +101,9 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
     // Ensure we're on an actual page.
     val effectivePage = if (selectedPage >= pageCount) pageCount - 1 else selectedPage
     val sortedRecords =
-        if (null == _sortKey)
+        if (null == _sortKey) {
             filteredRecords
-        else {
+        } else {
             fun <S : Comparable<S>> directionalSort(sortingFunction: (GridRecord) -> S) =
                 when (_sortKey!!.sortDir) {
                     SortDir.Ascending ->
