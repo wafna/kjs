@@ -112,9 +112,7 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                         filteredRecords.sortedByDescending { sortingFunction(it) }
                 }
             when (val sortIndex = _sortKey!!.index) {
-                // Numerical sort on id.
                 0 -> directionalSort { it.id }
-                // Lexical sort on everything else.
                 1 -> directionalSort { it.name }
                 2 -> directionalSort { it.number }
                 else -> {
@@ -123,9 +121,8 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                 }
             }
         }
-
     // The records we'll actually display.
-    val recordSlice = let {
+    val displayRecords = let {
         val low = max(0, effectivePage * props.pageSize)
         val high = min((1 + effectivePage) * props.pageSize, totalRecords)
         sortedRecords.slice(low until high)
@@ -178,7 +175,7 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                     }
                 }
                 // Render each record to an array of components.
-                records = recordSlice.map { record ->
+                records = displayRecords.map { record ->
                     listOf(
                         FC { +record.id.toString() },
                         FC { h.pre { +record.name } },
