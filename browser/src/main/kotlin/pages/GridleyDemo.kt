@@ -89,8 +89,8 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
         if (searchTarget.isEmpty()) {
             props.recordSet
         } else {
+            inline fun hit(s: String) = s.contains(searchTarget)
             props.recordSet.filter { record ->
-                inline fun hit(s: String) = s.contains(searchTarget)
                 hit(record.id.toString()) || hit(record.name) || hit(record.number)
             }
         }
