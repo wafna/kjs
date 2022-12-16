@@ -161,6 +161,7 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                 headers = columnHeaders.withIndex().map { p ->
                     val index = p.index
                     FC {
+                        // Sorting for all but the last column.
                         if (index != 3) {
                             SortControl {
                                 sortDir = _sortKey?.let { if (index == it.index) it.sortDir else null }
@@ -189,16 +190,12 @@ val GridleyDemo = FC<GridleyProps<GridRecord>> { props ->
                             fun stuff(s: Boolean) {
                                 if (s) {
                                     h.span {
-                                        css {
-                                            color = Color("#008000")
-                                        }
+                                        css { color = Color("#008000") }
                                         +"✓"
                                     }
                                 } else {
                                     h.span {
-                                        css {
-                                            color = Color("#800000")
-                                        }
+                                        css { color = Color("#800000") }
                                         +"X"
                                     }
                                 }
