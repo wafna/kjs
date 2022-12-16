@@ -68,6 +68,10 @@ data class GridRecord(val id: Int, val name: String, val number: String, val stu
  */
 private data class SortKey(val index: Int, val sortDir: SortDir)
 
+/**
+ * We can be be type safe on the records because none of the-components
+ * knows what it's doing.
+ */
 external interface GridleyProps<R> : Props {
     var recordSet: List<R>
     var pageSize: Int
