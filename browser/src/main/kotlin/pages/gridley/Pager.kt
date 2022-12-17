@@ -17,7 +17,7 @@ private val PageLinkDisabled = ClassName("page-link disabled")
 private val PageItem = ClassName("page-item")
 
 /**
- * Implementation of GridleyPagerProps using Bootstrap.
+ * Page navigation.
  */
 val GridleyPager = FC<GridleyPagerProps> { props ->
     val preceding = props.currentPage

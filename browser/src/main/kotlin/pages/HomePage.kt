@@ -29,6 +29,20 @@ private val LineItem = FC<LineItemProps> { props ->
     }
 }
 
+private external interface QuickBulletProps : Props {
+    var name: String
+    var desc: String
+}
+
+private val QuickBullet = FC<QuickBulletProps> { props ->
+    h.li {
+        +props.name
+        +Entities.nbsp; +Entities.ndash; +Entities.nbsp
+        +props.desc
+    }
+
+}
+
 private external interface ParagraphProps : Props {
     var sentences: List<String>
 }
@@ -84,17 +98,18 @@ val HomePage = FC<Props> {
             sentences = listOf("Demonstrates a highly decomposed system for displaying tabular data.")
         }
         h.ul {
-            h.li { +"Customizable rendering of data." }
+            h.li { +"Full control of data rendering." }
             h.li { +"Derived and compositional fields." }
-            h.li { +"Customizable rendering of controls and components." }
             h.li { +"Representation independent sorting and searching." }
             h.li { +"Type safe handling of data records." }
+            h.li { +"Full control of styling and layout of controls and components." }
         }
         h.br()
         Paragraph {
             sentences = listOf(
-                "The problem with most approaches to this problem is that they violate the principle of single responsibility, binding together styling, layout," +
-                        " and implementations into a fairly opaque blob that limits one's options to those foreseen by the implementor.",
+                "The problem with most approaches to this problem is that they violate the principle of single responsibility, " +
+                        "binding together the styling, layout, and implementations of various unrelated functions " +
+                        "into a fairly opaque blob that limits one's options to those foreseen by the implementor.",
                 "This approach breaks all the functions apart at the price of turning a library into a framework, at best, but really a design pattern.",
                 "In return, we get an enormous amount of flexibility."
             )
@@ -107,6 +122,12 @@ val HomePage = FC<Props> {
                 "The logic for implementing searching, sorting, and pagination is bound in a single controller component.",
                 "Thus, the controller component is the only place where the structure of the data being displayed is known."
             )
+        }
+        h.ul {
+            QuickBullet { name = "Display"; desc = "Fills table rows from lists of component generating functions." }
+            QuickBullet { name = "Pager"; desc = "Displays navigation to different pages." }
+            QuickBullet { name = "Search"; desc = "Input for search strings." }
+            QuickBullet { name = "Sort"; desc = "Controls for directional sorting by column." }
         }
     }
 }

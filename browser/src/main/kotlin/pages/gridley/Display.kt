@@ -29,8 +29,9 @@ external interface GridleyDisplayProps : Props {
 
     /**
      * Component to display when there are no records.
+     * This gives us the option of displaying the empty table.
      */
-    var empty: FC<Props>
+    var emptyMessage: FC<Props>
 }
 
 /**
@@ -65,7 +66,7 @@ val GridleyDisplay = FC<GridleyDisplayProps> { props ->
             }
         }
         if (records.isEmpty()) {
-            props.empty {}
+            props.emptyMessage {}
         }
     }
 }

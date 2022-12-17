@@ -3,8 +3,12 @@ package pages.gridley
 import csstype.ClassName
 import react.FC
 import react.Props
-import react.dom.html.ReactHTML as h
 import util.preventDefault
+import react.dom.html.ReactHTML as h
+
+enum class SortDir {
+    Ascending, Descending
+}
 
 /**
  * A clickable control for a single sort direction.
@@ -16,19 +20,16 @@ fun sortIcon(text: String) = FC<Props> {
     }
 }
 
-// The various indications.
-
-val DownOff = sortIcon("▽")
-val DownOn = sortIcon("▼")
-val UpOff = sortIcon("△")
-val UpOn = sortIcon("▲")
-
-enum class SortDir {
-    Ascending, Descending
-}
-
 external interface SortControlProps : Props {
+    /**
+     * Which if either of the arrows to highlight.
+     * This indicates the current sort condition on the row.
+     */
     var sortDir: SortDir?
+    /**
+     * When one of the directions is selected the direction is transmitted to the controller,
+     * which already knows which column this is.
+     */
     var action: (SortDir) -> Unit
 }
 
@@ -41,18 +42,18 @@ val SortControl = FC<SortControlProps> { props ->
         className = ClassName("sort-control-box")
         h.div {
             onClick = preventDefault { props.action(SortDir.Ascending) }
-            if (sort == SortDir.Ascending)
-                UpOn {}
-            else
-                UpOff {}
+            when (sort) {
+                SortDir.Ascending -> sortIcon("▲")()
+                else -> sortIcon("△")()
+            }
         }
         h.div {
             className = ClassName("float-down")
             onClick = preventDefault { props.action(SortDir.Descending) }
-            if (sort == SortDir.Descending)
-                DownOn {}
-            else
-                DownOff {}
+            when (sort) {
+                SortDir.Descending -> sortIcon("▼")()
+                else -> sortIcon("▽")()
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ external interface GridleySearchProps : Props {
     var onSearch: (String) -> Unit
 }
 
-val GridleySearch = FC<GridleySearchProps> { props ->
+val Search = FC<GridleySearchProps> { props ->
     var filter by useState("")
     h.input {
         className = ClassName("form-control")

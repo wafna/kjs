@@ -192,7 +192,7 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
             }
             h.div {
                 className = ClassName("float-left")
-                GridleySearch {
+                Search {
                     onSearch = { searchTarget = it }
                 }
             }
@@ -229,7 +229,7 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
                     displayRecords.map { record ->
                         RecordLine(record.id.toString(), columns.map { it.renderField(record) })
                     }
-                empty = FC {
+                emptyMessage = FC {
                     h.div {
                         className = ClassName("alert alert-warning")
                         h.h3 { +"No records." }
