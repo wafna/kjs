@@ -3,5 +3,7 @@
 group = "wafna"
 version = "0.0.1-SNAPSHOT"
 
-tasks.getByPath(":server:distZip").dependsOn(":browser:build")
-tasks.getByPath(":server:distTar").dependsOn(":browser:build")
+// The production browser is bundled into the server distribution.
+listOf(":server:distZip", ":server:distTar").forEach { dep ->
+    tasks.getByPath(dep).dependsOn(":browser:build")
+}

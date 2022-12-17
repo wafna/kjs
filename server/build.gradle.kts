@@ -46,10 +46,7 @@ distributions {
     main {
         distributionBaseName.set("kjs")
         contents {
-            from(file("configs")) {
-                into("configs")
-            }
-            from(rootProject.file("browser/build")) {
+            from(rootProject.file("browser/build/distributions")) {
                 into("browser")
             }
         }
