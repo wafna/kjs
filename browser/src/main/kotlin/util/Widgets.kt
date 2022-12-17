@@ -1,7 +1,6 @@
 package util
 
 import csstype.ClassName
-import react.ChildrenBuilder
 import react.FC
 import react.Props
 import react.PropsWithChildren
@@ -34,7 +33,8 @@ val Row = FC<PropsSplat> { props ->
     }
 }
 
-enum class ColumnScale(val scale: String) {
+@Suppress("unused")
+enum class ColumnScale(private val scale: String) {
     Small("sm"),
     Medium("md"),
     Large("lg");
@@ -89,6 +89,8 @@ val ErrorPage = FC<ErrorPageProps> { props ->
 }
 
 object Entities {
-    fun ChildrenBuilder.nbsp() = +"\u00A0"
+    const val nbsp = "\u00A0"
+    const val ndash = "–"
+    const val mspace = "\u2003"
+    const val nspace = "\u2002"
 }
-

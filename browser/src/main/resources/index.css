@@ -20,11 +20,10 @@ body {
 }
 
 .spinner {
-    width: 16px;
-    height: 16px;
     padding: 1px;
     margin: 0;
     align-content: center;
+    font-size: smaller;
 }
 
 .sort-control-box {

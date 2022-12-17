@@ -3,12 +3,18 @@ package pages.gridley
 import csstype.ClassName
 import react.FC
 import react.Props
+import react.key
 import react.dom.html.ReactHTML as h
 
 /**
  * A list of components to be embedded in a row in a table.
  */
 typealias DisplayLine = List<FC<Props>>
+
+/**
+ * The components for a row of the table plus a key for React.
+ */
+data class RecordLine(val key: String, val displayLine: DisplayLine)
 
 external interface GridleyDisplayProps : Props {
     /**
@@ -19,7 +25,7 @@ external interface GridleyDisplayProps : Props {
     /**
      * A list of lists of components for the table data.
      */
-    var records: List<DisplayLine>
+    var records: List<RecordLine>
 
     /**
      * Component to display when there are no records.
@@ -49,8 +55,9 @@ val GridleyDisplay = FC<GridleyDisplayProps> { props ->
                 h.tbody {
                     for (record in records) {
                         h.tr {
-                            for (field in record) {
-                                h.td { field {} }
+                            key = record.key
+                            for (component in record.displayLine) {
+                                h.td { component {} }
                             }
                         }
                     }

@@ -7,21 +7,16 @@ import react.Props
 
 typealias Params = Map<String, String>
 
-fun Params.getString(param: String): String? = get(param)
 fun Params.getInt(param: String): Int? = get(param)?.toIntOrNull()
-fun Params.getDouble(param: String): Double? = get(param)?.toDoubleOrNull()
 
 class ParamBuilder internal constructor() {
     private val params = mutableMapOf<String, String>()
     internal fun toMap(): Params = params.toMap()
-    fun addParam(name: String, value: Any?) {
-        if (params.containsKey(name))
-            throw Exception("Duplicate parameter $name")
-        params[name] = value?.toString() ?: ""
-    }
 
     operator fun Pair<String, Any>.unaryPlus() {
-        addParam(this.first, this.second)
+        if (params.containsKey(this.first))
+            throw Exception("Duplicate parameter ${this.first}")
+        params[this.first] = this.second.toString() ?: ""
     }
 }
 
@@ -61,6 +56,7 @@ data class HashRoute(val path: String, val params: Params = mapOf()) {
     companion object {
         fun build(routeId: String, params: ParamBuilder.() -> Unit): HashRoute =
             HashRoute(routeId, paramBuilder(params))
+
         /**
          * Retrieves the current hash parsed as a HashRoute.
          */
@@ -119,29 +115,34 @@ interface Route {
 /**
  * Searches the routes for a match for the hash and emits its component.
  * Emits the defaultComponent when the hash is empty or missing.
- * Throws an error if no match is found.
+ * Uses the first route as a default if no hash is present or no match is found.
  */
 fun ChildrenBuilder.doRoute(
-    routes: Collection<Route>,
     hash: HashRoute?,
-    defaultComponent: FC<Props>,
-    badHash: ChildrenBuilder.(HashRoute) -> Unit = {}
+    routes: List<Route>
 ) {
+    require(routes.isNotEmpty()) {
+        "No routes provided."
+    }
     routes.map { it.routeId }.let {
         require(it.toSet().size == routes.size) {
             "Non-unique route ids detected in: ${it.joinToString(", ")}"
         }
     }
+    val defPage by lazy { routes[0].component() }
     if (null == hash) {
-        defaultComponent {}
+        defPage{}
     } else {
         val hashPath = hash.path
         if (hashPath.isEmpty()) {
-            defaultComponent {}
+            defPage{}
         } else {
             when (val page = routes.find { it.routeId == hashPath }) {
-                null -> badHash(hash)
-                else -> (page.component(hash.params)) {}
+                null -> {
+                    console.warn("Bad route hash", hash)
+                    defPage{}
+                }
+                else -> (page.component(hash.params)){}
             }
         }
     }

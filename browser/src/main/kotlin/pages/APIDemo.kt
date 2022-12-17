@@ -80,6 +80,8 @@ private val ItemCtrl = FC<ItemCtrlProps> { props ->
 
 val RecordList = FC<Props> {
 
+    console.log("RECORD LIST RENDER")
+
     var records: List<Record>? by useState(null)
     var editedRecord: Record? by useState(null)
     var createNew by useState(false)

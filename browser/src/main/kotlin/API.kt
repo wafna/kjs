@@ -54,19 +54,32 @@ private suspend inline fun <reified T> json(response: Response): T =
 object API {
     private const val apiRoot = "http://localhost:8081/api"
 
+    private fun makeURL(path: String, vararg params: Pair<String, String>): String = buildString {
+        append(apiRoot)
+        append("/")
+        append(path)
+        if (params.isNotEmpty()) {
+            append("?")
+            var sep = false
+            for (param in params) {
+                if (sep) append("&") else sep = true
+                append(param.first)
+                append("=")
+                append(param.second)
+            }
+        }
+    }
+
     // Get all the records.
     suspend fun listRecords(): List<Record> =
-        json(get("$apiRoot/record"))
+        json(get(makeURL("record")))
 
     suspend fun deleteRecord(id: UUID) =
-        delete("$apiRoot/record?id=$id")
+        delete(makeURL("record", "id" to id))
 
     suspend fun updateRecord(record: Record) =
-        post("$apiRoot/record", record)
+        post(makeURL("record"), record)
 
     suspend fun createRecord(record: RecordWIP) =
-        put("$apiRoot/record", record)
-
-    // Intended to fail
-    suspend fun nonesuch() = get("$apiRoot/nonesuch")
+        put(makeURL("record"), record)
 }

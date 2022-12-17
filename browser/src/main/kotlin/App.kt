@@ -1,6 +1,8 @@
+import csstype.ClassName
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
-import pages.GridleyDemoRecordSource
+import pages.GridleyDemo
+import pages.HomePage
 import pages.RecordList
 import pages.TimerDemo
 import react.FC
@@ -12,38 +14,48 @@ import react.dom.html.ReactHTML as h
 
 // Routes...
 
-object APIDemoPage : Route {
+object HomeRoute : Route {
+    override val routeId: String = "home"
+    override fun component(params: Params): FC<Props> = HomePage
+}
+
+object APIDemoRoute : Route {
     override val routeId: String = "api-demo"
     override fun component(params: Params): FC<Props> = RecordList
 }
 
-object TimerDemoPage : Route {
+object TimerDemoRoute : Route {
     override val routeId: String = "timer-demo"
+
+    // Even the names of the hash params are fully encapsulated.
+    private const val Height = "height"
+    private const val Width = "width"
 
     // If the page component requires configuration, just wrap it in a component that does not!
     override fun component(params: Params): FC<Props> = FC {
         TimerDemo {
-            height = params.getInt("height") ?: 400
-            width = params.getInt("width") ?: 400
+            height = params.getInt(Height) ?: 400
+            width = params.getInt(Width) ?: 400
         }
     }
 
     /**
      * A custom URL generator for this route.
      */
-    fun makeHash(height: Double, width: Double): HashRoute =
-        HashRoute.build(routeId) {
-            +("height" to height)
-            +("width" to width)
+    fun makeHash(height: Double, width: Double): HashRoute {
+        return HashRoute.build(routeId) {
+            +(Height to height)
+            +(Width to width)
         }
+    }
 }
 
-object GridleyDemoPage : Route {
+object GridleyDemoRoute : Route {
     override val routeId: String = "gridley-demo"
-    override fun component(params: Params): FC<Props> = GridleyDemoRecordSource
+    override fun component(params: Params): FC<Props> = GridleyDemo
 }
 
-private val routes = listOf(APIDemoPage, TimerDemoPage, GridleyDemoPage)
+val Routes = listOf(HomeRoute, APIDemoRoute, TimerDemoRoute, GridleyDemoRoute)
 
 // Main component.
 
@@ -77,29 +89,32 @@ val App = FC<Props> {
                 scale = ColumnScale.Large
                 size = 12
                 NavBar {
+                    h.a {
+                        className = ClassName("navbar-brand")
+                        href = HomeRoute.defaultHash().href
+                        +"KJS"
+                    }
                     NavItem {
                         name = "API Demo"
-                        to = APIDemoPage.defaultHash()
+                        to = APIDemoRoute.defaultHash()
                     }
                     NavItem {
                         name = "Timer Demo"
-                        to = TimerDemoPage.makeHash(500.0, 500.0)
+                        to = TimerDemoRoute.makeHash(500.0, 500.0)
                     }
                     NavItem {
                         name = "Gridley Demo"
-                        to = GridleyDemoPage.defaultHash()
+                        to = GridleyDemoRoute.defaultHash()
                     }
                 }
             }
         }
-        h.br {}
+        h.br()
         Row {
             Col {
                 scale = ColumnScale.Large
                 size = 12
-                doRoute(routes, route, RecordList) { hash ->
-                    ErrorPage { message = "Bad route: ${hash.href}" }
-                }
+                doRoute(route, Routes)
             }
         }
     }
