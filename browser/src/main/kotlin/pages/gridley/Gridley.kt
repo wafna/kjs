@@ -1,8 +1,6 @@
 package pages.gridley
 
 import csstype.ClassName
-import csstype.Color
-import emotion.react.css
 import pages.GridRecord
 import react.FC
 import react.Props
@@ -67,15 +65,17 @@ external interface GridleyProps<R> : Props {
  * This is the nexus of the grid where all the bits are wired together.
  */
 val Gridley = FC<GridleyProps<GridRecord>> { props ->
+
+    // We keep separate lists of filtered and sorted records.
+    // This improves performance as well as making the effect of successive sorts cumulative.
+    var filteredRecords by useState(props.recordSet)
+    var sortedRecords by useState(props.recordSet)
+
     var selectedPage by useState(0)
-    var searchTarget by useState("")
     var sortKey: SortKey? by useState(null)
 
-    // Below, we calculate a bunch of related things ultimately to collect the page of records we will display
-    // and to get correct settings for the pagination control.
-
-    val filteredRecords =
-        if (searchTarget.isEmpty()) {
+    fun updateFilteredRecords(searchTarget: String) {
+        filteredRecords = if (searchTarget.isEmpty()) {
             props.recordSet
         } else {
             inline fun hit(s: String) = s.contains(searchTarget)
@@ -83,27 +83,31 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
                 hit(record.id.toString()) || hit(record.name) || hit(record.number)
             }
         }
+    }
+
+    fun updateSortedRecords(sortKey: SortKey?) {
+        sortedRecords = when (sortKey) {
+            null -> filteredRecords
+            else ->
+                // We can be sure the comparator exists because we rendered a sort key for it.
+                props.columns[sortKey.index].comparator!!.let { comparator ->
+                    filteredRecords.sortedWith(
+                        when (sortKey.sortDir) {
+                            SortDir.Ascending -> comparator
+                            SortDir.Descending -> comparator.reversed()
+                        }
+                    )
+                }
+        }
+    }
+
     val totalRecords = filteredRecords.size
     val pageCount = ceil(totalRecords.toDouble() / props.pageSize).toInt()
     // Ensure we're on an actual page.
     val effectivePage = min(pageCount - 1, selectedPage)
-    val sortedRecords =
-        if (null == sortKey) {
-            filteredRecords
-        } else {
-            // We can be sure the comparator exists because we rendered a sort key for it.
-            props.columns[sortKey!!.index].comparator!!.let { comparator ->
-                filteredRecords.sortedWith(
-                    when (sortKey!!.sortDir) {
-                        SortDir.Ascending -> comparator
-                        SortDir.Descending -> comparator.reversed()
-                    }
-                )
-            }
-        }
     // The page of records to display.
     val displayRecords = sortedRecords.run {
-        val low = max(0,effectivePage * props.pageSize)
+        val low = max(0, effectivePage * props.pageSize)
         val high = min((1 + effectivePage) * props.pageSize, totalRecords)
         slice(low until high)
     }
@@ -123,7 +127,7 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
             h.div {
                 className = ClassName("float-left")
                 Search {
-                    onSearch = { searchTarget = it }
+                    onSearch = ::updateFilteredRecords
                 }
             }
         }
@@ -136,16 +140,22 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
             GridleyDisplay {
                 // Render the column headers to an array of components.
                 headers = props.columns.withIndex().map { p ->
-                    val index = p.index
+                    val columnIndex = p.index
                     val column = p.value
                     FC {
-                        // Sorting for all but the last column.
+                        // The presence of a comparator means the column is sortable.
                         if (null != column.comparator) {
                             h.div {
                                 className = ClassName("float-left ")
                                 SortControl {
-                                    sortDir = sortKey?.let { if (index == it.index) it.sortDir else null }
-                                    action = { sortKey = SortKey(index, it) }
+                                    sortDir = sortKey?.let { if (columnIndex == it.index) it.sortDir else null }
+                                    action = { sortDir ->
+                                        // We cannot rely on state to return the new sort key when updateSortedRecords
+                                        // executes, below, so we pass it in.
+                                        val newSK = SortKey(columnIndex, sortDir)
+                                        sortKey = newSK
+                                        updateSortedRecords(newSK)
+                                    }
                                 }
                             }
                         }
