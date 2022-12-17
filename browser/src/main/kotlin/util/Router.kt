@@ -124,23 +124,21 @@ fun ChildrenBuilder.doRoute(
     require(routes.isNotEmpty()) {
         "No routes provided."
     }
-    routes.map { it.routeId }.let {
-        require(it.toSet().size == routes.size) {
-            "Non-unique route ids detected in: ${it.joinToString(", ")}"
-        }
+    require(routes.map { it.routeId }.toSet().size == routes.size) {
+        "Non-unique route ids detected."
     }
     val defPage by lazy { routes[0].component() }
     if (null == hash) {
-        defPage{}
+        defPage {}
     } else {
         val hashPath = hash.path
         if (hashPath.isEmpty()) {
-            defPage{}
+            defPage {}
         } else {
             when (val page = routes.find { it.routeId == hashPath }) {
                 null -> {
                     console.warn("Bad route hash", hash)
-                    defPage{}
+                    defPage {}
                 }
                 else -> (page.component(hash.params)){}
             }

@@ -17,8 +17,11 @@ import react.dom.html.ReactHTML as h
 
 /**
  * Definition of a column in the table, providing the facilities of rendering, searching, and sorting.
+ * By specifying the columns in an indexable collection we can correlate them with table events, like sorting.
+ * This abstraction later sets up a very generic way to render the table and data
+ * as well as implementation of searching and sorting.
  */
-private abstract class DisplayColumn {
+abstract class DisplayColumn {
     /**
      * Indicates whether and how the column can be searched.
      * This allows for flexibility like case insensitive search or search on text implied by status icons.
@@ -44,80 +47,6 @@ private abstract class DisplayColumn {
     abstract fun renderField(record: GridRecord): FC<Props>
 }
 
-// Specializations on DisplayColumn to avoid repetition.
-
-private abstract class DisplayColumnStdHdr(headerText: String) : DisplayColumn() {
-    override val header: FC<Props> = FC {
-        h.span {
-            className = ClassName("gridley-header")
-            +headerText
-        }
-    }
-}
-
-private abstract class DisplayColumnInt(headerText: String) : DisplayColumnStdHdr(headerText) {
-    abstract fun value(record: GridRecord): Int
-    override val searchFunction: ((GridRecord) -> String) = { value(it).toString() }
-    override val comparator: Comparator<GridRecord> = Comparator { a, b -> value(a).compareTo(value(b)) }
-    override fun renderField(record: GridRecord): FC<Props> = FC { h.pre { +value(record).toString() } }
-}
-
-private abstract class DisplayColumnPre(headerText: String) : DisplayColumnStdHdr(headerText) {
-    abstract fun value(record: GridRecord): String
-    override val searchFunction: ((GridRecord) -> String) = { value(it) }
-    override val comparator: Comparator<GridRecord> = Comparator { a, b -> value(a).compareTo(value(b)) }
-    override fun renderField(record: GridRecord): FC<Props> = FC { h.pre { +value(record) } }
-}
-
-private val red = Color("#008000")
-private val green = Color("#800000")
-
-/**
- * By specifying the columns in an indexable collection we can correlate them with table events, like sorting.
- * For simple fields, all we have to do is teach the column how to get a value from the record.
- * This abstraction later sets up a very generic way to render the table and data
- * as well as implementation of searching and sorting.
- */
-private val columns: List<DisplayColumn> = listOf(
-    object : DisplayColumnInt("Id") {
-        override fun value(record: GridRecord): Int = record.id
-    },
-    object : DisplayColumnPre("Name") {
-        override fun value(record: GridRecord): String = record.name
-    },
-    object : DisplayColumnPre("Number") {
-        override fun value(record: GridRecord): String = record.number
-    },
-    object : DisplayColumn() {
-        override val searchFunction: ((GridRecord) -> String)? = null
-        override val comparator: Comparator<GridRecord> =
-            Comparator { a, b -> 10 * a.stuff.first.compareTo(b.stuff.first) + a.stuff.second.compareTo(b.stuff.second) }
-        override val header: FC<Props> =
-            FC { +"This"; h.br {}; +"That" }
-
-        override fun renderField(record: GridRecord): FC<Props> =
-            // You can do anything you want in here.
-            FC {
-                fun icon(s: Boolean) {
-                    if (s) {
-                        h.span {
-                            css { color = red }
-                            +"✓"
-                        }
-                    } else {
-                        h.span {
-                            css { color = green }
-                            +"X"
-                        }
-                    }
-                }
-                icon(record.stuff.first)
-                h.br {}
-                icon(record.stuff.second)
-            }
-    }
-)
-
 /**
  * Keeping track of the column on and direction in which sorting is to be applied.
  */
@@ -128,9 +57,10 @@ private data class SortKey(val index: Int, val sortDir: SortDir)
  * knows what it's doing.
  */
 external interface GridleyProps<R> : Props {
-//    var columns: List<DisplayColumn>
+    var columns: List<DisplayColumn>
     var pageSize: Int
     var recordSet: List<R>
+    var emptyMessage: FC<Props>
 }
 
 /**
@@ -162,7 +92,7 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
             filteredRecords
         } else {
             // We can be sure the comparator exists because we rendered a sort key for it.
-            columns[sortKey!!.index].comparator!!.let { comparator ->
+            props.columns[sortKey!!.index].comparator!!.let { comparator ->
                 filteredRecords.sortedWith(
                     when (sortKey!!.sortDir) {
                         SortDir.Ascending -> comparator
@@ -205,7 +135,7 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
             size = 12
             GridleyDisplay {
                 // Render the column headers to an array of components.
-                headers = columns.withIndex().map { p ->
+                headers = props.columns.withIndex().map { p ->
                     val index = p.index
                     val column = p.value
                     FC {
@@ -227,14 +157,9 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
                 }
                 records =
                     displayRecords.map { record ->
-                        RecordLine(record.id.toString(), columns.map { it.renderField(record) })
+                        RecordLine(record.id.toString(), props.columns.map { it.renderField(record) })
                     }
-                emptyMessage = FC {
-                    h.div {
-                        className = ClassName("alert alert-warning")
-                        h.h3 { +"No records." }
-                    }
-                }
+                emptyMessage = props.emptyMessage
             }
         }
     }
