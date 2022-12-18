@@ -101,10 +101,12 @@ val Gridley = FC<GridleyProps<GridRecord>> { props ->
         }
     }
 
+    // Data for pagination and display.
+
     val totalRecords = filteredRecords.size
     val pageCount = ceil(totalRecords.toDouble() / props.pageSize).toInt()
     // Ensure we're on an actual page.
-    val effectivePage = min(pageCount - 1, selectedPage)
+    val effectivePage = max(0, min(pageCount - 1, selectedPage))
     // The page of records to display.
     val displayRecords = sortedRecords.run {
         val low = max(0, effectivePage * props.pageSize)
